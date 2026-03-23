@@ -1791,16 +1791,7 @@ def admin_eeg_data():
     if 'user_id' not in session or session.get('user_type') != 'admin':
         return redirect(url_for('login'))
     
-    # Get all analyses (including published ones that can be shared)
-    all_analyses = Analysis.query.order_by(Analysis.created_at.desc()).all()
-    
-    # Get all users (for sharing)
-    all_users = User.query.filter_by(user_type='user').all()
-    
-    # Get all data files
-    all_files = DataFile.query.order_by(DataFile.uploaded_at.desc()).all()
-    
-    return render_template('admin/eeg_data.html', analyses=all_analyses, users=all_users, data_files=all_files)
+    return render_template('admin/eeg_data.html')
 
 
 @app.route('/admin/user-management')
