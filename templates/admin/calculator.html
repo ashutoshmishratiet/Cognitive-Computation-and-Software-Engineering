@@ -1,0 +1,792 @@
+{% extends "base.html" %}
+
+{% block title %}Performance Calculator - Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .calc-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+    
+    .calc-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+    
+    .calc-section h2 {
+        color: #1e293b;
+        border-left: 4px solid #2563eb;
+        padding-left: 1rem;
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+    }
+    
+    .input-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .input-item {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .input-item label {
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .input-item input {
+        padding: 0.75rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+    
+    .input-item input:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        outline: none;
+    }
+    
+    .input-item select {
+        padding: 0.75rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        background-color: white;
+        cursor: pointer;
+        font-family: inherit;
+    }
+    
+    .input-item select:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        outline: none;
+    }
+    
+    .domain-title {
+        font-weight: 700;
+        color: #2563eb;
+        margin-bottom: 1rem;
+        font-size: 1rem;
+    }
+    
+    .emotion-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .emotion-item {
+        background: linear-gradient(135deg, #fff5f7 0%, #ffe0e6 100%);
+        padding: 1.2rem;
+        border-radius: 10px;
+        border-left: 4px solid #f5576c;
+        border: 2px solid #fbcfe8;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .emotion-item:hover {
+        box-shadow: 0 4px 12px rgba(245, 87, 108, 0.2);
+        transform: translateY(-2px);
+    }
+    
+    .emotion-item.inactive {
+        opacity: 0.5;
+        background: #f5f5f5;
+        border-color: #d1d5db;
+    }
+    
+    .emotion-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+    
+    .emotion-item label {
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0;
+        display: block;
+        font-size: 0.95rem;
+        flex: 1;
+    }
+    
+    .btn-remove-emotion {
+        background: #ef4444;
+        color: white;
+        border: none;
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .btn-remove-emotion:hover {
+        background: #dc2626;
+        transform: scale(1.1);
+    }
+    
+    .btn-add-emotion {
+        background: #10b981;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 1.5rem;
+        width: fit-content;
+    }
+    
+    .btn-add-emotion:hover {
+        background: #059669;
+        transform: translateY(-2px);
+    }
+    
+    .emotion-inputs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+    
+    .emotion-inputs input {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        text-align: center;
+    }
+    
+    .emotion-label-mini {
+        font-size: 0.7rem;
+        color: #64748b;
+        text-align: center;
+    }
+    
+    .btn-calculate {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin-top: 1.5rem;
+    }
+    
+    .btn-calculate:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .results-container {
+        display: none;
+    }
+    
+    .results-container.show {
+        display: block;
+        animation: slideIn 0.5s ease;
+    }
+    
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .result-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        border-top: 4px solid;
+    }
+    
+    .result-card.technical { border-top-color: #667eea; }
+    .result-card.emotional { border-top-color: #f5576c; }
+    .result-card.combined { border-top-color: #10b981; }
+    
+    .result-title {
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 1rem;
+        font-size: 1rem;
+    }
+    
+    .score-display {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 1rem;
+    }
+    
+    .score-item {
+        text-align: center;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-radius: 10px;
+        border: 2px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+    
+    .score-item:hover {
+        border-color: #2563eb;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+    }
+    
+    .score-label {
+        font-size: 0.85rem;
+        color: #64748b;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .score-value {
+        font-size: 2.2rem;
+        font-weight: 900;
+        color: #2563eb;
+        line-height: 1;
+    }
+    
+    .combined-score {
+        text-align: center;
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin: 1.5rem 0;
+    }
+    
+    .combined-score .score-label {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.95rem;
+    }
+    
+    .combined-score .score-value {
+        color: white;
+    }
+    
+    .btn-download {
+        background: #10b981;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 6px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin-top: 1rem;
+    }
+    
+    .btn-download:hover {
+        background: #059669;
+    }
+    
+    .info-box {
+        background: #eff6ff;
+        border-left: 4px solid #2563eb;
+        padding: 1rem;
+        border-radius: 6px;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+        color: #1e40af;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="calc-container">
+    <!-- Header -->
+    <div class="calc-section">
+        <h1><i class="bi bi-calculator"></i> Performance Calculator</h1>
+        <p class="text-muted mb-0">Enter student responses to calculate technical, emotional, and combined performance scores</p>
+    </div>
+    
+    <!-- Calculator Form -->
+    <form id="calculatorForm">
+        <!-- Student Information -->
+        <div class="calc-section">
+            <h2><i class="bi bi-person-badge"></i> Student Information</h2>
+            <div class="input-row">
+                <div class="input-item">
+                    <label>Student ID</label>
+                    <input type="text" id="student_id" placeholder="e.g., STU001" value="">
+                </div>
+                <div class="input-item">
+                    <label>Student Name</label>
+                    <input type="text" id="student_name" placeholder="e.g., John Doe" value="">
+                </div>
+            </div>
+        </div>
+
+        <!-- Assign to User -->
+        <div class="calc-section">
+            <h2><i class="bi bi-user-check"></i> Assign Analysis to User</h2>
+            <p class="text-muted mb-3">Select the user to whom this analysis will be assigned</p>
+            <div class="input-row">
+                <div class="input-item" style="grid-column: span 2;">
+                    <label>Select User</label>
+                    <select id="selected_user" style="padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.9rem; background-color: white; cursor: pointer;">
+                        <option value="">-- Choose a User --</option>
+                        {% for user in users %}
+                        <option value="{{ user.id }}">{{ user.full_name }} ({{ user.email }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Technical Section -->
+        <div class="calc-section">
+            <h2><i class="bi bi-cpu"></i> Technical Performance (Bloom's Taxonomy)</h2>
+            <p class="text-muted mb-3">Enter counts for each domain (5 total questions per domain)</p>
+            
+            <!-- Understanding -->
+            <div style="margin-bottom: 2rem;">
+                <div class="domain-title">📚 Understanding (60% weight)</div>
+                <div class="input-row">
+                    <div class="input-item">
+                        <label>Correct</label>
+                        <input type="number" id="u_correct" min="0" max="5" value="0" required>
+                    </div>
+                    <div class="input-item">
+                        <label>Wrong</label>
+                        <input type="number" id="u_wrong" min="0" max="5" value="0" required>
+                    </div>
+                    <div class="input-item">
+                        <label>Not Attempted</label>
+                        <input type="number" id="u_not_attempted" min="0" max="5" value="0" required>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Debugging -->
+            <div style="margin-bottom: 2rem;">
+                <div class="domain-title">🐛 Debugging (20% weight)</div>
+                <div class="input-row">
+                    <div class="input-item">
+                        <label>Correct</label>
+                        <input type="number" id="d_correct" min="0" max="5" value="0" required>
+                    </div>
+                    <div class="input-item">
+                        <label>Wrong</label>
+                        <input type="number" id="d_wrong" min="0" max="5" value="0" required>
+                    </div>
+                    <div class="input-item">
+                        <label>Not Attempted</label>
+                        <input type="number" id="d_not_attempted" min="0" max="5" value="0" required>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Completion -->
+            <div>
+                <div class="domain-title">✓ Completion (20% weight)</div>
+                <div class="input-row">
+                    <div class="input-item">
+                        <label>Correct</label>
+                        <input type="number" id="c_correct" min="0" max="5" value="0" required>
+                    </div>
+                    <div class="input-item">
+                        <label>Wrong</label>
+                        <input type="number" id="c_wrong" min="0" max="5" value="0" required>
+                    </div>
+                    <div class="input-item">
+                        <label>Not Attempted</label>
+                        <input type="number" id="c_not_attempted" min="0" max="5" value="0" required>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Emotional Section -->
+        <div class="calc-section">
+            <h2><i class="bi bi-heart"></i> Emotional Performance (Dynamic)</h2>
+            <p class="text-muted mb-3">Rate each statement 1-5 (1=Strongly Disagree, 5=Strongly Agree) | Add/Remove parameters as needed</p>
+            <div class="info-box">
+                <strong>Before:</strong> Assessment before the activity | <strong>After:</strong> Assessment after the activity | Click <strong>X</strong> to remove a parameter
+            </div>
+            <button type="button" class="btn-add-emotion" onclick="addEmotionParameter()">
+                <i class="bi bi-plus-circle"></i> Add Emotion Parameter
+            </button>
+            <div class="emotion-grid" id="emotionGrid"></div>
+        </div>
+        
+        <!-- Calculate Button -->
+        <button type="button" class="btn-calculate" onclick="calculatePerformance()">
+            <i class="bi bi-play-circle"></i> Calculate Performance
+        </button>
+    </form>
+    
+    <!-- Results -->
+    <div id="resultsSection" class="results-container">
+        <!-- Technical -->
+        <div class="calc-section">
+            <div class="result-card technical">
+                <div class="result-title"><i class="bi bi-cpu"></i> Technical Scores</div>
+                <div class="score-display">
+                    <div class="score-item">
+                        <div class="score-label">Understanding (T1)</div>
+                        <div class="score-value" id="t1_result">-</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-label">Debugging (T2)</div>
+                        <div class="score-value" id="t2_result">-</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-label">Completion (T3)</div>
+                        <div class="score-value" id="t3_result">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Emotional -->
+        <div class="calc-section">
+            <div class="result-card emotional">
+                <div class="result-title"><i class="bi bi-heart"></i> Emotional Scores</div>
+                <div class="score-display">
+                    <div class="score-item">
+                        <div class="score-label">Before Avg</div>
+                        <div class="score-value" id="b1_result">-</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-label">After Avg</div>
+                        <div class="score-value" id="a1_result">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Combined -->
+        <div class="calc-section">
+            <div class="combined-score">
+                <div class="score-label">Combined Performance Score</div>
+                <div class="score-value" id="combined_result">-</div>
+                <div style="font-size: 1rem; margin-top: 0.5rem;">out of <strong>0.75</strong></div>
+                <div style="font-size: 1.2rem; margin-top: 1rem; font-weight: 700;" id="performance_percentage">-</div>
+                <div style="font-size: 0.95rem; margin-top: 0.5rem;" id="performance_level">-</div>
+            </div>
+            
+            <button type="button" class="btn-download" onclick="downloadExcel()">
+                <i class="bi bi-download"></i> Download Results as Excel
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+const DEFAULT_EMOTIONS = [
+    'I felt engaged',
+    'I understood concepts',
+    'I felt confident',
+    'I completed tasks',
+    'I was motivated',
+    'I enjoyed learning',
+    'I felt supported'
+];
+
+let activeEmotions = new Set();
+let emotionsList = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+    initializeEmotions();
+    setupInputListeners();
+});
+
+function initializeEmotions() {
+    emotionsList = [...DEFAULT_EMOTIONS];
+    activeEmotions = new Set(emotionsList.map((_, i) => i));
+    renderEmotionFields();
+}
+
+function renderEmotionFields() {
+    const grid = document.getElementById('emotionGrid');
+    grid.innerHTML = '';
+    
+    emotionsList.forEach((emotion, index) => {
+        const div = document.createElement('div');
+        div.className = 'emotion-item';
+        if (!activeEmotions.has(index)) {
+            div.classList.add('inactive');
+        }
+        div.id = `emotion-container-${index}`;
+        
+        div.innerHTML = `
+            <div class="emotion-header">
+                <label>${index + 1}. ${emotion}</label>
+                <button type="button" class="btn-remove-emotion" onclick="removeEmotionParameter(${index})" title="Remove this parameter">×</button>
+            </div>
+            <div class="emotion-inputs">
+                <div>
+                    <input type="number" id="emotion_${index}_before" min="1" max="5" value="3" onchange="calculatePerformance()">
+                    <div class="emotion-label-mini">Before</div>
+                </div>
+                <div>
+                    <input type="number" id="emotion_${index}_after" min="1" max="5" value="3" onchange="calculatePerformance()">
+                    <div class="emotion-label-mini">After</div>
+                </div>
+            </div>
+        `;
+        grid.appendChild(div);
+    });
+}
+
+function addEmotionParameter() {
+    const newEmotions = [
+        'I felt motivated to learn more',
+        'I felt frustrated at times',
+        'I felt satisfied with my work',
+        'I felt challenged appropriately',
+        'I felt supported by resources',
+        'I felt a sense of achievement',
+        'I felt connected to peers'
+    ];
+    
+    let addedNew = false;
+    for (let i = 0; i < newEmotions.length; i++) {
+        const checkName = newEmotions[i];
+        if (!emotionsList.includes(checkName)) {
+            emotionsList.push(checkName);
+            activeEmotions.add(emotionsList.length - 1);
+            addedNew = true;
+            break;
+        }
+    }
+    
+    if (!addedNew && emotionsList.length < 15) {
+        emotionsList.push(`Custom emotion ${emotionsList.length + 1}`);
+        activeEmotions.add(emotionsList.length - 1);
+    }
+    
+    renderEmotionFields();
+    calculatePerformance();
+}
+
+function removeEmotionParameter(index) {
+    if (activeEmotions.has(index)) {
+        activeEmotions.delete(index);
+    } else {
+        activeEmotions.add(index);
+    }
+    renderEmotionFields();
+    calculatePerformance();
+}
+
+function setupInputListeners() {
+    // Add real-time calculation on input change
+    ['u_correct', 'u_wrong', 'u_not_attempted', 'd_correct', 'd_wrong', 'd_not_attempted', 'c_correct', 'c_wrong', 'c_not_attempted'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('change', calculatePerformance);
+        }
+    });
+}
+
+function calculatePerformance() {
+    // Technical inputs
+    const u_correct = parseInt(document.getElementById('u_correct').value) || 0;
+    const u_wrong = parseInt(document.getElementById('u_wrong').value) || 0;
+    const u_not_attempted = parseInt(document.getElementById('u_not_attempted').value) || 0;
+    
+    const d_correct = parseInt(document.getElementById('d_correct').value) || 0;
+    const d_wrong = parseInt(document.getElementById('d_wrong').value) || 0;
+    const d_not_attempted = parseInt(document.getElementById('d_not_attempted').value) || 0;
+    
+    const c_correct = parseInt(document.getElementById('c_correct').value) || 0;
+    const c_wrong = parseInt(document.getElementById('c_wrong').value) || 0;
+    const c_not_attempted = parseInt(document.getElementById('c_not_attempted').value) || 0;
+    
+    // Emotional inputs - only active emotions
+    const emotionBefore = [];
+    const emotionAfter = [];
+    const activeEmotionIndices = Array.from(activeEmotions).sort((a, b) => a - b);
+    
+    activeEmotionIndices.forEach(i => {
+        const beforeEl = document.getElementById(`emotion_${i}_before`);
+        const afterEl = document.getElementById(`emotion_${i}_after`);
+        if (beforeEl && afterEl) {
+            emotionBefore.push(parseInt(beforeEl.value) || 3);
+            emotionAfter.push(parseInt(afterEl.value) || 3);
+        }
+    });
+    
+    const activeEmotionCount = activeEmotionIndices.length;
+    
+    // Technical calculations
+    const u_raw = (u_correct * 1.0) + (u_wrong * -0.25);
+    const d_raw = (d_correct * 1.0) + (d_wrong * -0.25);
+    const c_raw = (c_correct * 1.0) + (c_wrong * -0.25);
+    
+    const u_s = u_raw / 5;
+    const d_s = d_raw / 5;
+    const c_s = c_raw / 5;
+    
+    const u_s1 = u_s * 0.6;
+    const d_s1 = d_s * 0.2;
+    const c_s1 = c_s * 0.2;
+    
+    const t1 = Math.max(0, Math.min(1, (u_s1 + 0.25) / 1.25));
+    const t2 = Math.max(0, Math.min(1, (d_s1 + 0.25) / 1.25));
+    const t3 = Math.max(0, Math.min(1, (c_s1 + 0.25) / 1.25));
+    
+    const cl1 = t1 + t2 + t3;
+    const cl1_div3 = cl1 / 3;
+    const cl1_div3_scaled = cl1_div3 * 0.5;
+    
+    // Emotional calculations - DYNAMIC based on active emotion count
+    let b1 = 0, a1 = 0;
+    if (activeEmotionCount > 0) {
+        b1 = emotionBefore.reduce((a, b) => a + b, 0) / activeEmotionCount / 5;
+        a1 = emotionAfter.reduce((a, b) => a + b, 0) / activeEmotionCount / 5;
+    }
+    
+    const b1_scaled = b1 * 0.5;
+    const a1_scaled = a1 * 0.5;
+    
+    const emotion_value = (b1_scaled + a1_scaled) / 2;
+    const emotion_value_scaled = emotion_value * 0.5;
+    
+    // Combined
+    const combined = cl1_div3_scaled + emotion_value_scaled;
+    const percentage = (combined / 0.75) * 100;
+    
+    // Display with bold styling
+    document.getElementById('t1_result').innerHTML = `<strong>${t1.toFixed(3)}</strong>`;
+    document.getElementById('t2_result').innerHTML = `<strong>${t2.toFixed(3)}</strong>`;
+    document.getElementById('t3_result').innerHTML = `<strong>${t3.toFixed(3)}</strong>`;
+    
+    document.getElementById('b1_result').innerHTML = `<strong>${b1.toFixed(3)}</strong>`;
+    document.getElementById('a1_result').innerHTML = `<strong>${a1.toFixed(3)}</strong>`;
+    
+    document.getElementById('combined_result').innerHTML = `<strong>${combined.toFixed(3)}</strong>`;
+    document.getElementById('performance_percentage').innerHTML = `<strong>${percentage.toFixed(1)}%</strong>`;
+    
+    let level = '↓ Low Performance';
+    if (percentage >= 67) level = '✓ High Performance';
+    else if (percentage >= 33) level = '→ Moderate Performance';
+    document.getElementById('performance_level').textContent = level;
+    
+    // Store for download
+    window.calcResults = {
+        student: {
+            id: document.getElementById('student_id').value || 'N/A',
+            name: document.getElementById('student_name').value || 'N/A',
+            date: new Date().toLocaleDateString()
+        },
+        selected_user_id: document.getElementById('selected_user').value || null,
+        technical: { t1, t2, t3, cl1_div3_scaled },
+        emotional: { b1, a1, emotion_value_scaled, activeEmotionCount },
+        combined,
+        percentage,
+        inputs: {
+            understanding: { correct: u_correct, wrong: u_wrong, not_attempted: u_not_attempted },
+            debugging: { correct: d_correct, wrong: d_wrong, not_attempted: d_not_attempted },
+            completion: { correct: c_correct, wrong: c_wrong, not_attempted: c_not_attempted },
+            emotion_before: emotionBefore,
+            emotion_after: emotionAfter,
+            active_emotions: activeEmotionIndices.map(i => emotionsList[i])
+        }
+    };
+    
+    document.getElementById('resultsSection').classList.add('show');
+}
+
+function downloadExcel() {
+    if (!window.calcResults) {
+        alert('Calculate first');
+        return;
+    }
+    
+    const selectedUserId = document.getElementById('selected_user').value;
+    if (!selectedUserId) {
+        alert('Please select a user to assign this analysis to');
+        return;
+    }
+    
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/admin/download-calculation';
+    
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'data';
+    input.value = JSON.stringify(window.calcResults);
+    
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+}
+
+function shareAnalysis() {
+    if (!window.calcResults) {
+        alert('Please calculate performance first');
+        return;
+    }
+    
+    const selectedUserId = document.getElementById('selected_user').value;
+    if (!selectedUserId) {
+        alert('Please select a user to share this analysis with');
+        return;
+    }
+    
+    const form = new FormData();
+    form.append('data', JSON.stringify(window.calcResults));
+    
+    fetch('/admin/share-calculation', {
+        method: 'POST',
+        body: form
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('✓ Analysis successfully shared with ' + document.getElementById('selected_user').options[document.getElementById('selected_user').selectedIndex].text);
+            // Reset form
+            document.getElementById('calculatorForm').reset();
+            document.getElementById('resultsSection').classList.remove('show');
+            initializeEmotions();
+        } else {
+            alert('Error: ' + (data.error || data.message));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error sharing analysis. Please try again.');
+    });
+}
+}
+</script>
+{% endblock %}

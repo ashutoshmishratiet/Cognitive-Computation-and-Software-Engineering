@@ -1,0 +1,575 @@
+{% extends "base.html" %}
+{% block title %}Analysis Results - Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .metric-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+    
+    .metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+    }
+    
+    .metric-title {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #64748b;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+    
+    .metric-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #2563eb;
+    }
+    
+    .metric-subtitle {
+        font-size: 0.9rem;
+        color: #64748b;
+        margin-top: 0.5rem;
+    }
+    
+    .badge-category {
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-weight: 500;
+        font-size: 0.85rem;
+    }
+    
+    .badge-high {
+        background-color: #fee;
+        color: #c33;
+    }
+    
+    .badge-moderate {
+        background-color: #fef3c7;
+        color: #d97706;
+    }
+    
+    .badge-low {
+        background-color: #d1fae5;
+        color: #059669;
+    }
+    
+    .index-breakdown {
+        background: #f8fafc;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 0.5rem;
+    }
+    
+    .breakdown-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        font-size: 0.9rem;
+    }
+    
+    .breakdown-label {
+        color: #64748b;
+    }
+    
+    .breakdown-value {
+        font-weight: 600;
+        color: #1e293b;
+    }
+    
+    .action-bar {
+        background: #f8fafc;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        display: flex;
+        gap: 1rem;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 500;
+        font-size: 0.85rem;
+    }
+    
+    .status-draft {
+        background: #e2e8f0;
+        color: #475569;
+    }
+    
+    .status-published {
+        background: #dcfce7;
+        color: #166534;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div style="margin-bottom: 2rem;">
+    <div class="page-header">
+        <h1><i class="bi bi-graph-up"></i> Analysis Results</h1>
+        <p>Research-grade cognitive performance analysis and metrics</p>
+    </div>
+</div>
+
+<!-- Admin Menu Tabs -->
+<ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/dashboard">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/upload">
+            <i class="bi bi-cloud-upload"></i> Upload
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/data-manager">
+            <i class="bi bi-folder-check"></i> Data Manager
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="/admin/analyses">
+            <i class="bi bi-graph-up"></i> Analyses
+        </a>
+    </li>
+</ul>
+
+<!-- Analysis Header -->
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <h3>{{ analysis.title }}</h3>
+                <p class="text-muted mb-2">{{ analysis.description }}</p>
+                <small class="text-muted">
+                    From: <strong>{{ analysis.data_file.original_name }}</strong> | 
+                    Created: <strong>{{ analysis.created_at.strftime('%Y-%m-%d %H:%M') }}</strong>
+                </small>
+            </div>
+            <div>
+                {% if analysis.is_published %}
+                <span class="status-badge status-published">✓ Published</span>
+                {% else %}
+                <span class="status-badge status-draft">Draft</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Data Type Info Banner -->
+{% if analyzer_type == 'normalized' %}
+<div class="alert alert-info alert-dismissible fade show" role="alert">
+    <i class="bi bi-info-circle"></i> <strong>Normalized Technical Indices</strong>
+    <br/>
+    <small>This analysis uses pre-normalized technical indices (CUI, CDI, CCI on 0-1 scale). 
+    Scores are rescaled to 0-10 for visualization. Raw question-level breakdown is unavailable for normalized datasets.</small>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+
+<!-- Action Bar -->
+<div class="action-bar">
+    <div>
+        {% if not analysis.is_published %}
+        <form method="POST" action="/admin/publish/{{ analysis.id }}" style="display: flex; gap: 1rem; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <input type="checkbox" id="replace_old" name="replace_old" value="on">
+                <label for="replace_old" style="margin: 0; cursor: pointer; font-size: 0.9rem;">Replace old analyses</label>
+            </div>
+            <button type="submit" class="btn btn-success" onclick="return confirm('Publish this analysis? Users will be able to see it.');">
+                <i class="bi bi-upload"></i> Publish Analysis
+            </button>
+        </form>
+        {% else %}
+        <span class="badge bg-success"><i class="bi bi-check-circle"></i> Published</span>
+        {% endif %}
+    </div>
+    <div>
+        <a href="/admin/analyses" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Analyses
+        </a>
+        <a href="/admin/delete-analysis/{{ analysis.id }}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this analysis? This will also remove it from all users. This action cannot be undone.');">
+            <i class="bi bi-trash"></i> Delete Analysis
+        </a>
+    </div>
+</div>
+
+<!-- Share with User Section -->
+<div style="background: white; padding: 1.5rem; border-radius: 10px; margin: 1.5rem 0; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06); border-left: 4px solid #3b82f6;">
+    <h5 style="margin-bottom: 1rem; color: #1e293b;">
+        <i class="bi bi-share"></i> Share This Analysis with Specific User
+    </h5>
+    {% if analysis.shared_with_user_id %}
+    <div style="margin-bottom: 1rem; padding: 1rem; background: #d1fae5; border-radius: 6px; border-left: 4px solid #10b981;">
+        <strong style="color: #065f46;">✓ Shared with:</strong>
+        <span style="color: #047857;">
+            {% set shared_user = users|selectattr('id', 'equalto', analysis.shared_with_user_id)|first %}
+            {{ shared_user.full_name if shared_user else 'Unknown User' }} ({{ shared_user.email if shared_user else '' }})
+        </span>
+        <div style="font-size: 0.85rem; color: #059669; margin-top: 0.5rem;">
+            Shared at: {{ analysis.shared_at.strftime('%Y-%m-%d %H:%M') if analysis.shared_at else 'N/A' }}
+        </div>
+    </div>
+    <form method="POST" action="/admin/unshare-analysis/{{ analysis.id }}" style="display: inline;">
+        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Remove sharing? User will no longer see this analysis.');">
+            <i class="bi bi-x-circle"></i> Unshare
+        </button>
+    </form>
+    {% else %}
+    <form method="POST" action="/admin/share-analysis/{{ analysis.id }}" style="margin-bottom: 0;">
+        <div style="display: flex; gap: 1rem; align-items: flex-end;">
+            <div style="flex: 1;">
+                <label for="user_ids" style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b;">Select User(s)</label>
+                <select name="user_ids" id="user_ids" style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.9rem;" required multiple>
+                    {% for user in users %}
+                    <option value="{{ user.id }}">{{ user.full_name }} ({{ user.email }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" style="margin-bottom: 0;">
+                <i class="bi bi-check-circle"></i> Share Now
+            </button>
+        </div>
+    </form>
+    {% endif %}
+</div>
+
+<!-- Main Metrics -->
+<h4 class="mb-3 mt-4"><i class="bi bi-graph-up"></i> Cognitive Performance Indices</h4>
+
+{% if analyzer_type == 'normalized' %}
+<!-- NORMALIZED DATA VIEW -->
+<div class="row">
+    <!-- Understanding Index (Normalized) -->
+    <div class="col-lg-6 col-xl-4">
+        <div class="metric-card">
+            <div class="metric-title">
+                Code Understanding Index
+                <i class="bi bi-question-circle" title="Mean Code Understanding Index (CUI - normalized 0-1 scale)"></i>
+            </div>
+            <div class="metric-value">{{ metrics.understanding.score|round(1) }}</div>
+            <div class="metric-subtitle">Score out of 10 (CUI × 10)</div>
+            <div class="index-breakdown">
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Pre-normalized Index</span>
+                    <span class="breakdown-value">{{ metrics.understanding.raw_value|round(3) }}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Scale</span>
+                    <span class="breakdown-value">0.0–1.0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Debugging Index (Normalized) -->
+    <div class="col-lg-6 col-xl-4">
+        <div class="metric-card">
+            <div class="metric-title">
+                Debugging Index
+                <i class="bi bi-question-circle" title="Mean Debugging Index (CDI - normalized 0-1 scale)"></i>
+            </div>
+            <div class="metric-value">{{ metrics.debugging.score|round(1) }}</div>
+            <div class="metric-subtitle">Score out of 10 (CDI × 10)</div>
+            <div class="index-breakdown">
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Pre-normalized Index</span>
+                    <span class="breakdown-value">{{ metrics.debugging.raw_value|round(3) }}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Scale</span>
+                    <span class="breakdown-value">0.0–1.0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Completion Index (Normalized) -->
+    <div class="col-lg-6 col-xl-4">
+        <div class="metric-card">
+            <div class="metric-title">
+                Completion Index
+                <i class="bi bi-question-circle" title="Mean Completion Index (CCI - normalized 0-1 scale)"></i>
+            </div>
+            <div class="metric-value">{{ metrics.completion.score|round(1) }}</div>
+            <div class="metric-subtitle">Score out of 10 (CCI × 10)</div>
+            <div class="index-breakdown">
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Pre-normalized Index</span>
+                    <span class="breakdown-value">{{ metrics.completion.raw_value|round(3) }}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Scale</span>
+                    <span class="breakdown-value">0.0–1.0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Technical Comprehensive Index (Normalized) -->
+<h4 class="mb-3 mt-4"><i class="bi bi-bullseye"></i> Technical Comprehensive Index</h4>
+<div class="row">
+    <div class="col-lg-6">
+        <div class="metric-card">
+            <div class="metric-title">Combined Technical Score</div>
+            <div class="metric-value">{{ metrics.technical_index.overall_score|round(1) }}</div>
+            <div class="metric-subtitle">Composite of CUI, CDI, and CCI</div>
+            <div class="index-breakdown">
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Calculation</span>
+                    <span class="breakdown-value">(CUI + CDI + CCI) / 3 × 10</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Percentile Rank</span>
+                    <span class="breakdown-value">{{ metrics.technical_index.percentile|round(0) }}th percentile</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Raw Composite</span>
+                    <span class="breakdown-value">{{ (metrics.technical_index.overall_score / 10)|round(3) }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-info-circle"></i> Methodology Note</h5>
+                <p class="small" style="color: #64748b;">
+                    <strong>Normalized Analysis:</strong> This analysis was created from pre-normalized technical indices. 
+                    Each index (CUI, CDI, CCI) represents a performance score on the 0–1 scale. 
+                    The combined technical score is their average, then rescaled to 0–10 for easy interpretation.
+                    No raw question-level data is available.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<!-- RAW DATA VIEW (original behavior) -->
+<div class="row">
+    <!-- Understanding Index -->
+    <div class="col-lg-6 col-xl-4">
+        <div class="metric-card">
+            <div class="metric-title">Understanding Index</div>
+            <div class="metric-value">{{ metrics.understanding.score|round(1) }}</div>
+            <div class="metric-subtitle">Score out of 10</div>
+            <div class="index-breakdown">
+                <div class="breakdown-item">
+                    <span class="breakdown-label">✓ Correct (U_C)</span>
+                    <span class="breakdown-value">{{ metrics.understanding.correct|round(2) }}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">✗ Wrong (U_W)</span>
+                    <span class="breakdown-value">{{ metrics.understanding.wrong|round(2) }}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">◌ Not Attempted (U_NA)</span>
+                    <span class="breakdown-value">{{ metrics.understanding.not_attempted|round(2) }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Debugging Index -->
+    <div class="col-lg-6 col-xl-4">
+        <div class="metric-card">
+            <div class="metric-title">Debugging Index</div>
+            <div class="metric-value">{{ metrics.debugging.score|round(1) }}</div>
+            <div class="metric-subtitle">Score out of 10</div>
+            <div class="index-breakdown">
+                <div class="breakdown-item">
+                    <span class="breakdown-label">✓ Correct (D_C)</span>
+                    <span class="breakdown-value">{{ metrics.debugging.correct|round(2) }}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">✗ Wrong (D_W)</span>
+                    <span class="breakdown-value">{{ metrics.debugging.wrong|round(2) }}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">◌ Not Attempted (D_NA)</span>
+                    <span class="breakdown-value">{{ metrics.debugging.not_attempted|round(2) }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Completion Index -->
+    <div class="col-lg-6 col-xl-4">
+        <div class="metric-card">
+            <div class="metric-title">Completion Index</div>
+            <div class="metric-value">{{ metrics.completion.score|round(1) }}</div>
+            <div class="metric-subtitle">Score out of 10</div>
+            <div class="index-breakdown">
+                <div class="breakdown-item">
+                    <span class="breakdown-label">✓ Correct (C_C)</span>
+                    <span class="breakdown-value">{{ metrics.completion.correct|round(2) }}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">✗ Wrong (C_W)</span>
+                    <span class="breakdown-value">{{ metrics.completion.wrong|round(2) }}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">◌ Not Attempted (C_NA)</span>
+                    <span class="breakdown-value">{{ metrics.completion.not_attempted|round(2) }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Technical Comprehensive Index -->
+<h4 class="mb-3 mt-4"><i class="bi bi-bullseye"></i> Technical Comprehensive Index</h4>
+<div class="row">
+    <div class="col-lg-6">
+        <div class="metric-card">
+            <div class="metric-title">Combined Technical Score</div>
+            <div class="metric-value">{{ metrics.technical_index.overall_score|round(1) }}</div>
+            <div class="metric-subtitle">Average of Understanding + Debugging + Completion</div>
+            <div class="index-breakdown">
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Percentile Rank</span>
+                    <span class="breakdown-value">{{ metrics.technical_index.percentile|round(0) }}th percentile</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Emotion & Cognitive Load (for raw data) -->
+{% if analyzer_type != 'normalized' %}
+<h4 class="mb-3 mt-4"><i class="bi bi-heart-pulse"></i> Emotional & Cognitive State</h4>
+<div class="row">
+    <!-- Emotion Index -->
+    <div class="col-lg-6 col-xl-4">
+        <div class="metric-card">
+            <div class="metric-title">Emotion Index</div>
+            <div class="metric-value">{{ metrics.emotion.scaled_score|round(1) }}</div>
+            <div class="metric-subtitle">Scaled Score (0-100)</div>
+            <div class="index-breakdown">
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Raw Score</span>
+                    <span class="breakdown-value">{{ metrics.emotion.raw_score|round(2) }}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Category</span>
+                    <span class="breakdown-value">
+                        <span class="badge-category badge-{{ metrics.emotion.category.lower() }}">
+                            {{ metrics.emotion.category }}
+                        </span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cognitive Load -->
+    <div class="col-lg-6 col-xl-4">
+        <div class="metric-card">
+            <div class="metric-title">Cognitive Load</div>
+            <div class="metric-value">{{ metrics.cognitive_load.average_load|round(1) }}</div>
+            <div class="metric-subtitle">Average Load Level</div>
+            <div class="index-breakdown">
+                <div class="breakdown-item">
+                    <span class="breakdown-label">CL1 Value</span>
+                    <span class="breakdown-value">{{ metrics.cognitive_load.cl1_value|round(2) }}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">CL2 Value</span>
+                    <span class="breakdown-value">{{ metrics.cognitive_load.cl2_value|round(2) }}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Load Level</span>
+                    <span class="breakdown-value">
+                        <span class="badge-category badge-{{ metrics.cognitive_load.load_level.lower() }}">
+                            {{ metrics.cognitive_load.load_level }}
+                        </span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Problem Performance (for raw data only) -->
+{% if metrics.problem_performance %}
+<h4 class="mb-3 mt-4"><i class="bi bi-dice-1"></i> Problem Performance Analysis (Before/After)</h4>
+<div class="row">
+    {% for problem_id, problem_data in metrics.problem_performance.items() %}
+    <div class="col-lg-6 col-xl-4">
+        <div class="metric-card">
+            <div class="metric-title">{{ problem_id }}</div>
+            <div style="margin: 1rem 0;">
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Before</span>
+                    <span class="breakdown-value">{{ "%.2f" | format(problem_data.before) }}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">After</span>
+                    <span class="breakdown-value">{{ "%.2f" | format(problem_data.after) }}</span>
+                </div>
+                <div class="breakdown-item" style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid #e9ecef;">
+                    <span class="breakdown-label">Improvement %</span>
+                    <span class="breakdown-value" style="color: {% if problem_data.improvement_pct >= 0 %}#28a745{% else %}#dc3545{% endif %};">
+                        {{ "%.1f" | format(problem_data.improvement_pct) }}%
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endif %}
+
+<!-- Summary Statistics -->
+<h4 class="mb-3 mt-4"><i class="bi bi-bar-chart"></i> Summary Statistics</h4>
+<div class="card">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="text-center">
+                    <h5 style="color: #64748b;">Total Students</h5>
+                    <h2 style="color: #2563eb;">{{ metrics.summary.total_students }}</h2>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <h5 style="color: #64748b;">Features Analyzed</h5>
+                    <h2 style="color: #2563eb;">{{ metrics.summary.total_features }}</h2>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <h5 style="color: #64748b;">Data File</h5>
+                    <p style="font-size: 0.9rem;"><strong>{{ analysis.data_file.original_name }}</strong></p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <h5 style="color: #64748b;">Uploaded</h5>
+                    <p style="font-size: 0.9rem;">{{ analysis.data_file.uploaded_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

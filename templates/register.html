@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Cognitive Analysis System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 2rem 0;
+        }
+        
+        .register-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 2rem;
+        }
+        
+        .register-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .register-header {
+            background: linear-gradient(90deg, #1e40af 0%, #7c3aed 100%);
+            color: white;
+            padding: 2.5rem 2rem;
+            text-align: center;
+        }
+        
+        .register-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .register-body {
+            padding: 2.5rem 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        
+        .form-control {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 0.85rem 1rem;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: #1e40af;
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+        }
+        
+        .btn-register {
+            width: 100%;
+            padding: 0.9rem;
+            background: linear-gradient(90deg, #1e40af 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-register:hover {
+            background: linear-gradient(90deg, #1e3a8a 0%, #6d28d9 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(30, 64, 175, 0.3);
+        }
+        
+        .register-footer {
+            text-align: center;
+            padding: 1.5rem 2rem;
+            background: #f9fafb;
+            border-top: 1px solid #e5e7eb;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        
+        .register-footer a {
+            color: #1e40af;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .alert {
+            border: none;
+            border-radius: 8px;
+            border-left: 4px solid;
+            margin-bottom: 1.5rem;
+        }
+        
+        .alert-danger {
+            background-color: #fef2f2;
+            border-left-color: #dc2626;
+            color: #991b1b;
+        }
+
+        .error-message {
+            color: #dc2626;
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .form-control.is-invalid {
+            border-color: #dc2626;
+            background-color: #fef2f2;
+        }
+
+        .form-control.is-valid {
+            border-color: #16a34a;
+            background-color: #f0fdf4;
+        }
+
+        .password-strength {
+            margin-top: 0.5rem;
+            height: 4px;
+            background-color: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            transition: all 0.3s ease;
+            width: 0%;
+        }
+
+        .password-strength-bar.weak {
+            background-color: #dc2626;
+            width: 33%;
+        }
+
+        .password-strength-bar.fair {
+            background-color: #f59e0b;
+            width: 66%;
+        }
+
+        .password-strength-bar.strong {
+            background-color: #16a34a;
+            width: 100%;
+        }
+
+        .strength-text {
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .strength-text.show {
+            display: block;
+        }
+
+        .strength-text.weak {
+            color: #dc2626;
+        }
+
+        .strength-text.fair {
+            color: #f59e0b;
+        }
+
+        .strength-text.strong {
+            color: #16a34a;
+        }
+
+        .validation-icon {
+            position: absolute;
+            right: 1rem;
+            top: 2.5rem;
+            font-size: 1.2rem;
+            display: none;
+        }
+
+        .validation-icon.show {
+            display: block;
+        }
+
+        .validation-icon.valid {
+            color: #16a34a;
+        }
+
+        .validation-icon.invalid {
+            color: #dc2626;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .requirements-text {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .requirements-text.show {
+            display: block;
+        }
+
+        .requirement {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .requirement-icon {
+            display: inline-block;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background-color: #d1d5db;
+        }
+
+        .requirement.met .requirement-icon {
+            background-color: #16a34a;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-card">
+            <div class="register-header">
+                <h1><i class="bi bi-person-plus"></i></h1>
+                <h2>Create Account</h2>
+            </div>
+            
+            <div class="register-body">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+                <form method="POST" id="registerForm" novalidate>
+                    <div class="form-group">
+                        <label class="form-label" for="full_name">
+                            <i class="bi bi-person"></i> Full Name
+                        </label>
+                        <input type="text" class="form-control" id="full_name" name="full_name" placeholder="Enter your full name" required>
+                        <span class="validation-icon" id="fullNameIcon"></span>
+                        <div class="error-message" id="fullNameError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="username">
+                            <i class="bi bi-person-circle"></i> Username
+                        </label>
+                        <input type="text" class="form-control" id="username" name="username" placeholder="Choose a username (3-20 characters)" required>
+                        <span class="validation-icon" id="usernameIcon"></span>
+                        <div class="error-message" id="usernameError"></div>
+                        <div class="requirements-text" id="usernameReq">
+                            <div class="requirement" id="usernameLengthReq">
+                                <span class="requirement-icon"></span>
+                                <span>3-20 characters</span>
+                            </div>
+                            <div class="requirement" id="usernameCharReq">
+                                <span class="requirement-icon"></span>
+                                <span>Letters, numbers, underscore, hyphen only</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="email">
+                            <i class="bi bi-envelope"></i> Email
+                        </label>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="your.email@example.com" required>
+                        <span class="validation-icon" id="emailIcon"></span>
+                        <div class="error-message" id="emailError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="password">
+                            <i class="bi bi-lock"></i> Password
+                        </label>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Create a strong password" required>
+                        <span class="validation-icon" id="passwordIcon"></span>
+                        <div class="password-strength">
+                            <div class="password-strength-bar" id="strengthBar"></div>
+                        </div>
+                        <div class="strength-text" id="strengthText"></div>
+                        <div class="error-message" id="passwordError"></div>
+                        <div class="requirements-text show" id="passwordReq">
+                            <div class="requirement" id="passwordLengthReq">
+                                <span class="requirement-icon"></span>
+                                <span>At least 8 characters</span>
+                            </div>
+                            <div class="requirement" id="passwordUpperReq">
+                                <span class="requirement-icon"></span>
+                                <span>At least one uppercase letter (A-Z)</span>
+                            </div>
+                            <div class="requirement" id="passwordNumberReq">
+                                <span class="requirement-icon"></span>
+                                <span>At least one number (0-9)</span>
+                            </div>
+                            <div class="requirement" id="passwordSpecialReq">
+                                <span class="requirement-icon"></span>
+                                <span>At least one special character (!@#$%^&*)</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn-register" id="registerBtn">
+                        <i class="bi bi-check-lg"></i> Register
+                    </button>
+                </form>
+            </div>
+            
+            <div class="register-footer">
+                Already have an account? <a href="/login">Login here</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Validation patterns and rules
+        const validationRules = {
+            fullName: {
+                pattern: /^[a-zA-Z\s'-]{2,100}$/,
+                minLength: 2,
+                maxLength: 100,
+                messages: {
+                    empty: 'Full name is required',
+                    invalid: 'Full name can only contain letters, spaces, hyphens, and apostrophes',
+                    short: 'Full name must be at least 2 characters',
+                    long: 'Full name cannot exceed 100 characters'
+                }
+            },
+            username: {
+                pattern: /^[a-zA-Z0-9_-]{3,20}$/,
+                minLength: 3,
+                maxLength: 20,
+                messages: {
+                    empty: 'Username is required',
+                    invalid: 'Username can only contain letters, numbers, underscores, and hyphens',
+                    short: 'Username must be at least 3 characters',
+                    long: 'Username cannot exceed 20 characters'
+                }
+            },
+            email: {
+                pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                messages: {
+                    empty: 'Email is required',
+                    invalid: 'Please enter a valid email address',
+                    duplicate: 'This email is already registered'
+                }
+            },
+            password: {
+                minLength: 8,
+                requireUppercase: true,
+                requireNumber: true,
+                requireSpecial: true,
+                messages: {
+                    empty: 'Password is required',
+                    short: 'Password must be at least 8 characters',
+                    uppercase: 'Password must contain at least one uppercase letter',
+                    number: 'Password must contain at least one number',
+                    special: 'Password must contain at least one special character (!@#$%^&*)'
+                }
+            }
+        };
+
+        // Validation functions
+        const validators = {
+            fullName: (value) => {
+                if (!value.trim()) return { valid: false, error: 'Full name is required' };
+                if (value.length < validationRules.fullName.minLength) 
+                    return { valid: false, error: validationRules.fullName.messages.short };
+                if (value.length > validationRules.fullName.maxLength) 
+                    return { valid: false, error: validationRules.fullName.messages.long };
+                if (!validationRules.fullName.pattern.test(value)) 
+                    return { valid: false, error: validationRules.fullName.messages.invalid };
+                return { valid: true };
+            },
+
+            username: (value) => {
+                if (!value.trim()) return { valid: false, error: 'Username is required' };
+                if (value.length < validationRules.username.minLength) 
+                    return { valid: false, error: validationRules.username.messages.short };
+                if (value.length > validationRules.username.maxLength) 
+                    return { valid: false, error: validationRules.username.messages.long };
+                if (!validationRules.username.pattern.test(value)) 
+                    return { valid: false, error: validationRules.username.messages.invalid };
+                return { valid: true };
+            },
+
+            email: (value) => {
+                if (!value.trim()) return { valid: false, error: 'Email is required' };
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailPattern.test(value)) 
+                    return { valid: false, error: validationRules.email.messages.invalid };
+                return { valid: true };
+            },
+
+            password: (value) => {
+                if (!value) return { valid: false, error: 'Password is required' };
+                
+                const requirements = {
+                    length: value.length >= validationRules.password.minLength,
+                    uppercase: /[A-Z]/.test(value),
+                    number: /\d/.test(value),
+                    special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value)
+                };
+
+                if (!requirements.length) 
+                    return { valid: false, error: validationRules.password.messages.short };
+                if (!requirements.uppercase) 
+                    return { valid: false, error: validationRules.password.messages.uppercase };
+                if (!requirements.number) 
+                    return { valid: false, error: validationRules.password.messages.number };
+                if (!requirements.special) 
+                    return { valid: false, error: validationRules.password.messages.special };
+
+                return { valid: true, requirements };
+            }
+        };
+
+        // Password strength indicator
+        function updatePasswordStrength(password) {
+            const strengthBar = document.getElementById('strengthBar');
+            const strengthText = document.getElementById('strengthText');
+            
+            if (!password) {
+                strengthBar.className = 'password-strength-bar';
+                strengthText.classList.remove('show');
+                return;
+            }
+
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (password.length >= 12) strength++;
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+            if (/\d/.test(password)) strength++;
+            if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) strength++;
+
+            strengthText.classList.add('show');
+            
+            if (strength <= 2) {
+                strengthBar.className = 'password-strength-bar weak';
+                strengthText.className = 'strength-text show weak';
+                strengthText.textContent = 'Weak password';
+            } else if (strength <= 3) {
+                strengthBar.className = 'password-strength-bar fair';
+                strengthText.className = 'strength-text show fair';
+                strengthText.textContent = 'Fair password';
+            } else {
+                strengthBar.className = 'password-strength-bar strong';
+                strengthText.className = 'strength-text show strong';
+                strengthText.textContent = 'Strong password';
+            }
+        }
+
+        // Update password requirements
+        function updatePasswordRequirements(password) {
+            const requirements = {
+                length: password.length >= 8,
+                uppercase: /[A-Z]/.test(password),
+                number: /\d/.test(password),
+                special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
+            };
+
+            const elements = {
+                length: 'passwordLengthReq',
+                uppercase: 'passwordUpperReq',
+                number: 'passwordNumberReq',
+                special: 'passwordSpecialReq'
+            };
+
+            Object.entries(requirements).forEach(([key, met]) => {
+                const elem = document.getElementById(elements[key]);
+                if (met) {
+                    elem.classList.add('met');
+                } else {
+                    elem.classList.remove('met');
+                }
+            });
+        }
+
+        // Display validation error
+        function showError(inputId, errorId, iconId, message) {
+            const input = document.getElementById(inputId);
+            const errorEl = document.getElementById(errorId);
+            const iconEl = document.getElementById(iconId);
+
+            input.classList.remove('is-valid');
+            input.classList.add('is-invalid');
+            errorEl.textContent = message;
+            errorEl.classList.add('show');
+
+            if (iconEl) {
+                iconEl.classList.add('show', 'invalid');
+                iconEl.classList.remove('valid');
+                iconEl.innerHTML = '<i class="bi bi-x-circle-fill"></i>';
+            }
+        }
+
+        // Display validation success
+        function showSuccess(inputId, errorId, iconId) {
+            const input = document.getElementById(inputId);
+            const errorEl = document.getElementById(errorId);
+            const iconEl = document.getElementById(iconId);
+
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid');
+            errorEl.classList.remove('show');
+
+            if (iconEl) {
+                iconEl.classList.add('show', 'valid');
+                iconEl.classList.remove('invalid');
+                iconEl.innerHTML = '<i class="bi bi-check-circle-fill"></i>';
+            }
+        }
+
+        // Clear validation
+        function clearValidation(inputId, errorId, iconId) {
+            const input = document.getElementById(inputId);
+            const errorEl = document.getElementById(errorId);
+            const iconEl = document.getElementById(iconId);
+
+            input.classList.remove('is-invalid', 'is-valid');
+            errorEl.classList.remove('show');
+            if (iconEl) iconEl.classList.remove('show');
+        }
+
+        // Event listeners
+        document.getElementById('full_name').addEventListener('blur', function() {
+            const result = validators.fullName(this.value);
+            if (this.value && !result.valid) {
+                showError('full_name', 'fullNameError', 'fullNameIcon', result.error);
+            } else if (this.value && result.valid) {
+                showSuccess('full_name', 'fullNameError', 'fullNameIcon');
+            } else {
+                clearValidation('full_name', 'fullNameError', 'fullNameIcon');
+            }
+        });
+
+        document.getElementById('username').addEventListener('blur', function() {
+            const result = validators.username(this.value);
+            if (this.value && !result.valid) {
+                showError('username', 'usernameError', 'usernameIcon', result.error);
+                document.getElementById('usernameReq').classList.add('show');
+            } else if (this.value && result.valid) {
+                showSuccess('username', 'usernameError', 'usernameIcon');
+                document.getElementById('usernameReq').classList.remove('show');
+            } else {
+                clearValidation('username', 'usernameError', 'usernameIcon');
+            }
+        });
+
+        document.getElementById('username').addEventListener('input', function() {
+            const elem = document.getElementById('usernameReq');
+            if (this.value) {
+                elem.classList.add('show');
+                // Update username requirements visual feedback
+                const lengthReq = document.getElementById('usernameLengthReq');
+                const charReq = document.getElementById('usernameCharReq');
+                
+                if (this.value.length >= 3 && this.value.length <= 20) {
+                    lengthReq.classList.add('met');
+                } else {
+                    lengthReq.classList.remove('met');
+                }
+
+                if (/^[a-zA-Z0-9_-]*$/.test(this.value)) {
+                    charReq.classList.add('met');
+                } else {
+                    charReq.classList.remove('met');
+                }
+            } else {
+                elem.classList.remove('show');
+            }
+        });
+
+        document.getElementById('email').addEventListener('blur', function() {
+            const result = validators.email(this.value);
+            if (this.value && !result.valid) {
+                showError('email', 'emailError', 'emailIcon', result.error);
+            } else if (this.value && result.valid) {
+                showSuccess('email', 'emailError', 'emailIcon');
+            } else {
+                clearValidation('email', 'emailError', 'emailIcon');
+            }
+        });
+
+        document.getElementById('password').addEventListener('input', function() {
+            updatePasswordStrength(this.value);
+            updatePasswordRequirements(this.value);
+        });
+
+        document.getElementById('password').addEventListener('blur', function() {
+            const result = validators.password(this.value);
+            if (this.value && !result.valid) {
+                showError('password', 'passwordError', 'passwordIcon', result.error);
+            } else if (this.value && result.valid) {
+                showSuccess('password', 'passwordError', 'passwordIcon');
+            } else {
+                clearValidation('password', 'passwordError', 'passwordIcon');
+            }
+        });
+
+        // Form submission
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const fullName = document.getElementById('full_name').value;
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            let isValid = true;
+
+            // Validate all fields
+            const fullNameResult = validators.fullName(fullName);
+            if (!fullNameResult.valid) {
+                showError('full_name', 'fullNameError', 'fullNameIcon', fullNameResult.error);
+                isValid = false;
+            }
+
+            const usernameResult = validators.username(username);
+            if (!usernameResult.valid) {
+                showError('username', 'usernameError', 'usernameIcon', usernameResult.error);
+                isValid = false;
+            }
+
+            const emailResult = validators.email(email);
+            if (!emailResult.valid) {
+                showError('email', 'emailError', 'emailIcon', emailResult.error);
+                isValid = false;
+            }
+
+            const passwordResult = validators.password(password);
+            if (!passwordResult.valid) {
+                showError('password', 'passwordError', 'passwordIcon', passwordResult.error);
+                isValid = false;
+            }
+
+            if (isValid) {
+                this.submit();
+            }
+        });
+    </script>

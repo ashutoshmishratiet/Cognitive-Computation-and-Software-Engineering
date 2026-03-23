@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}Bulk Analysis - Admin{% endblock %}
+{% block content %}
+
+<div style="margin-bottom: 2rem;">
+    <div class="page-header">
+        <h1><i class="bi bi-people"></i> Bulk Student Analysis</h1>
+        <p>Batch processing and comprehensive group analysis</p>
+    </div>
+</div>
+
+<!-- Admin Menu Tabs -->
+<ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/dashboard">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/upload">
+            <i class="bi bi-cloud-upload"></i> Upload
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/data-manager">
+            <i class="bi bi-folder-check"></i> Data Manager
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/single-analysis">
+            <i class="bi bi-person-check"></i> Analysis
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/configuration">
+            <i class="bi bi-gear"></i> Settings
+        </a>
+    </li>
+</ul>
+
+{% if latest %}
+<div class="row">
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">Dataset Statistics</div>
+            <div class="card-body">
+                <div class="stat-card">
+                    <h4>Total Students</h4>
+                    <div class="value">{{ latest.rows_count }}</div>
+                </div>
+                <div class="stat-card mt-3">
+                    <h4>Total Features</h4>
+                    <div class="value">{{ latest.columns_count }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">Bulk Operations</div>
+            <div class="card-body">
+                <h5>Export Data</h5>
+                <p class="text-muted">Download the entire dataset in various formats</p>
+                <button class="btn btn-primary me-2" onclick="exportCSV()">
+                    <i class="bi bi-download"></i> Export as CSV
+                </button>
+                <button class="btn btn-success me-2" onclick="exportExcel()">
+                    <i class="bi bi-download"></i> Export as Excel
+                </button>
+                
+                <hr>
+                
+                <h5 class="mt-3">Analysis Tools</h5>
+                <p class="text-muted">Perform batch analysis on all students</p>
+                <button class="btn btn-info me-2" onclick="generateReport()">
+                    <i class="bi bi-file-text"></i> Generate Report
+                </button>
+                <button class="btn btn-warning" onclick="calculateStats()">
+                    <i class="bi bi-calculator"></i> Calculate Statistics
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">Summary Statistics</div>
+    <div class="card-body">
+        <div id="stats_content">
+            <p class="text-muted">Click "Calculate Statistics" to generate summary data</p>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> No data files available. Please <a href="/admin/upload">upload a file</a> to get started
+</div>
+{% endif %}
+
+<script>
+function exportCSV() {
+    alert('CSV export functionality coming soon');
+}
+
+function exportExcel() {
+    alert('Excel export functionality coming soon');
+}
+
+function generateReport() {
+    alert('Report generation coming soon');
+}
+
+function calculateStats() {
+    fetch('/api/data/latest')
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) return alert('Error: ' + data.error);
+            
+            let html = '<table class="table"><thead><tr><th>Column</th><th>Count</th><th>Mean</th><th>Std Dev</th><th>Min</th><th>Max</th></tr></thead><tbody>';
+            
+            // Simple statistics
+            const cols = data.columns;
+            for (let col of cols) {
+                html += `<tr><td>${col}</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>`;
+            }
+            
+            html += '</tbody></table>';
+            document.getElementById('stats_content').innerHTML = html;
+        });
+}
+</script>
+{% endblock %}

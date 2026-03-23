@@ -1,0 +1,787 @@
+{% extends "base.html" %}
+{% block title %}Analytics Dashboard - User{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-container {
+        background: white;
+        border-radius: 10px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+    
+    .section-header {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        border-bottom: 3px solid #2563eb;
+        padding-bottom: 1rem;
+    }
+    
+    .chart-box {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+    
+    .metric-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .metric-box {
+        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+    }
+    
+    .metric-box h5 {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        opacity: 0.9;
+        margin-bottom: 0.5rem;
+    }
+    
+    .metric-box h3 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0;
+    }
+    
+    .student-selector {
+        margin-bottom: 2rem;
+    }
+    
+    .selector-group {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-end;
+    }
+    
+    .selector-group label {
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .selector-group select {
+        padding: 0.75rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        min-width: 200px;
+        background: white;
+    }
+    
+    .selector-group button {
+        padding: 0.75rem 1.5rem;
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .selector-group button:hover {
+        background: #1e40af;
+    }
+    
+    .student-metrics {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .metric-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+    
+    .metric-card .label {
+        color: #64748b;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+    
+    .metric-card .value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2563eb;
+    }
+    
+    .gauge-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 250px;
+    }
+    
+    .dataTables_wrapper {
+        margin-top: 1rem;
+    }
+    
+    .table-container {
+        overflow-x: auto;
+    }
+    
+    .table thead {
+        background: #f8fafc;
+    }
+    
+    .table th {
+        font-weight: 600;
+        color: #1e293b;
+        padding: 1rem;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+    }
+    
+    .table td {
+        padding: 0.75rem 1rem;
+    }
+    
+    .table tbody tr:hover {
+        background: #f8fafc;
+    }
+    
+    .export-btn {
+        margin-bottom: 1rem;
+    }
+    
+    .loading {
+        display: none;
+        text-align: center;
+        padding: 2rem;
+    }
+    
+    .loading.show {
+        display: block;
+    }
+    
+    .loading-spinner {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(37, 99, 235, 0.3);
+        border-top: 4px solid #2563eb;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .color-coded {
+        font-weight: 600;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+    }
+    
+    .low {
+        background-color: #fca5a5;
+        color: #991b1b;
+    }
+    
+    .medium {
+        background-color: #fed7aa;
+        color: #92400e;
+    }
+    
+    .high {
+        background-color: #86efac;
+        color: #166534;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="spinner-overlay">
+    <div class="spinner-box">
+        <div class="loading-spinner"></div>
+        <p style="margin-top: 1rem; color: #1e293b;">Loading data...</p>
+    </div>
+</div>
+
+<div style="margin-bottom: 2rem;">
+    <div class="page-header">
+        <h1><i class="bi bi-graph-up"></i> Analytics Dashboard</h1>
+        <p>Comprehensive cognitive performance analysis and insights</p>
+    </div>
+</div>
+
+<!-- User Menu Tabs -->
+<ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+        <a class="nav-link active" href="/user/dashboard-v2">
+            <i class="bi bi-graph-up"></i> Analytics
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/profile">
+            <i class="bi bi-person-circle"></i> Profile
+        </a>
+    </li>
+</ul>
+
+<!-- SECTION 1: OVERALL GRAPHS -->
+<div class="dashboard-container">
+    <div class="section-header">
+        <i class="bi bi-bar-chart"></i> Section 1: Overall Performance (All Students)
+    </div>
+    
+    <!-- Overall Metrics -->
+    <div class="metric-row" id="overall-stats">
+        <div class="metric-box">
+            <h5>Total Students</h5>
+            <h3 id="stat-students">0</h3>
+        </div>
+        <div class="metric-box">
+            <h5>Avg Understanding</h5>
+            <h3 id="stat-understanding">0.0</h3>
+        </div>
+        <div class="metric-box">
+            <h5>Avg Debugging</h5>
+            <h3 id="stat-debugging">0.0</h3>
+        </div>
+        <div class="metric-box">
+            <h5>Avg Completion</h5>
+            <h3 id="stat-completion">0.0</h3>
+        </div>
+        <div class="metric-box">
+            <h5>Avg Cognitive Load</h5>
+            <h3 id="stat-cognitive">0.0%</h3>
+        </div>
+        <div class="metric-box">
+            <h5>Overall Performance</h5>
+            <h3 id="stat-performance">0.0/10</h3>
+        </div>
+    </div>
+    
+    <!-- Charts -->
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="chart-box">
+                <h5 class="mb-3">Cognitive Indices Comparison</h5>
+                <div class="chart-container" style="height: 250px;">
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="chart-box">
+                <h5 class="mb-3">Cognitive Load Distribution</h5>
+                <div class="chart-container" style="height: 250px;">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="chart-box">
+        <h5 class="mb-3">Performance Trends (Top 20 Students by Cognitive Load)</h5>
+        <div class="chart-container" style="height: 300px;">
+            <canvas id="lineChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- SECTION 2: STUDENT-SPECIFIC VIEW -->
+<div class="dashboard-container">
+    <div class="section-header">
+        <i class="bi bi-person-check"></i> Section 2: Individual Student Analysis
+    </div>
+    
+    <div class="student-selector">
+        <div class="selector-group">
+            <div>
+                <label for="studentSelect">Select Student:</label>
+                <select id="studentSelect">
+                    <option value="">-- Choose a Student --</option>
+                    {% for idx, student in students.iterrows() %}
+                        <option value="{{ student[student_id_col] }}">
+                            {{ student[student_id_col] }} (CL: {{ "%.1f"|format(student['Cognitive_Load_Avg']) }}%)
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button onclick="loadStudentData()">Load Analysis</button>
+        </div>
+    </div>
+    
+    <!-- Student Metrics -->
+    <div class="student-metrics" id="student-metrics" style="display: none;">
+        <div class="metric-card">
+            <div class="label">Understanding Score</div>
+            <div class="value" id="student-understanding">-</div>
+            <small style="color: #64748b;">/10</small>
+        </div>
+        <div class="metric-card">
+            <div class="label">Debugging Score</div>
+            <div class="value" id="student-debugging">-</div>
+            <small style="color: #64748b;">/10</small>
+        </div>
+        <div class="metric-card">
+            <div class="label">Completion Score</div>
+            <div class="value" id="student-completion">-</div>
+            <small style="color: #64748b;">/10</small>
+        </div>
+        <div class="metric-card">
+            <div class="label">Overall Performance</div>
+            <div class="value" id="student-performance">-</div>
+            <small style="color: #64748b;">/10</small>
+        </div>
+    </div>
+    
+    <!-- Charts -->
+    <div class="row" id="student-charts" style="display: none;">
+        <div class="col-lg-6">
+            <div class="chart-box">
+                <h5 class="mb-3">Individual Scores Comparison</h5>
+                <div class="chart-container" style="height: 250px;">
+                    <canvas id="studentBarChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="chart-box">
+                <h5 class="mb-3">Cognitive Load & Category</h5>
+                <div class="gauge-container">
+                    <canvas id="gaugeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SECTION 3: DATA TABLE WITH FILTERS & EXPORT -->
+<div class="dashboard-container">
+    <div class="section-header">
+        <i class="bi bi-table"></i> Section 3: Complete Data Table
+    </div>
+    
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <button class="btn btn-primary export-btn" onclick="exportToCSV()">
+                <i class="bi bi-download"></i> Export to CSV
+            </button>
+        </div>
+        <div class="col-md-6">
+            <div style="text-align: right;">
+                <span style="color: #64748b; font-size: 0.9rem;">
+                    Filter: <select id="filterCognitive" style="padding: 0.4rem 0.8rem; border: 1px solid #e2e8f0; border-radius: 4px;">
+                        <option value="">All Cognitive Loads</option>
+                        <option value="<20">Low (&lt;20%)</option>
+                        <option value="20-50">Medium (20-50%)</option>
+                        <option value=">50">High (&gt;50%)</option>
+                    </select>
+                </span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="table-container">
+        <table class="table table-striped" id="dataTable">
+            <thead>
+                <tr>
+                    <th>Student ID</th>
+                    <th>Understanding</th>
+                    <th>Debugging</th>
+                    <th>Completion</th>
+                    <th>Cognitive Load</th>
+                    <th>Category</th>
+                    <th>Overall Performance</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Chart variables
+    let barChart, pieChart, lineChart;
+    let studentBarChart, gaugeChart;
+    let dataTable;
+    
+    // Show/hide loading spinner
+    function showLoading() {
+        document.getElementById('loadingOverlay').classList.add('show');
+    }
+    
+    function hideLoading() {
+        document.getElementById('loadingOverlay').classList.remove('show');
+    }
+    
+    // Initialize dashboard on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        showLoading();
+        
+        Promise.all([
+            loadOverallStats(),
+            loadCharts(),
+            initializeDataTable()
+        ]).then(() => {
+            hideLoading();
+        }).catch(err => {
+            hideLoading();
+            console.error('Error loading dashboard:', err);
+        });
+    });
+    
+    // Load overall statistics
+    function loadOverallStats() {
+        fetch('/api/dashboard/overall-stats')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('stat-students').textContent = data.total_students;
+                document.getElementById('stat-understanding').textContent = data.avg_understanding.toFixed(1);
+                document.getElementById('stat-debugging').textContent = data.avg_debugging.toFixed(1);
+                document.getElementById('stat-completion').textContent = data.avg_completion.toFixed(1);
+                document.getElementById('stat-cognitive').textContent = data.avg_cognitive_load.toFixed(1) + '%';
+                document.getElementById('stat-performance').textContent = data.avg_performance.toFixed(1) + '/10';
+            })
+            .catch(err => console.error('Error loading stats:', err));
+    }
+    
+    // Load and render charts
+    function loadCharts() {
+        fetch('/api/dashboard/chart-data')
+            .then(response => response.json())
+            .then(data => {
+                renderBarChart(data.bar_chart);
+                renderPieChart(data.pie_chart);
+                renderLineChart(data.line_chart);
+            })
+            .catch(err => console.error('Error loading charts:', err));
+    }
+    
+    // Render Bar Chart (Cognitive Indices)
+    function renderBarChart(chartData) {
+        const ctx = document.getElementById('barChart').getContext('2d');
+        if (barChart) barChart.destroy();
+        
+        barChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    label: 'Average Score (out of 10)',
+                    data: chartData.data,
+                    backgroundColor: ['#2563eb', '#0891b2', '#059669'],
+                    borderRadius: 6,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 10
+                    }
+                }
+            }
+        });
+    }
+    
+    // Render Pie Chart (Cognitive Load Distribution)
+    function renderPieChart(chartData) {
+        const ctx = document.getElementById('pieChart').getContext('2d');
+        if (pieChart) pieChart.destroy();
+        
+        const colors = {
+            'Low': '#86efac',
+            'Medium': '#fed7aa',
+            'High': '#fca5a5'
+        };
+        
+        pieChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    data: chartData.data,
+                    backgroundColor: chartData.labels.map(label => colors[label] || '#ccc'),
+                    borderColor: 'white',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    }
+    
+    // Render Line Chart (Performance Trends)
+    function renderLineChart(chartData) {
+        const ctx = document.getElementById('lineChart').getContext('2d');
+        if (lineChart) lineChart.destroy();
+        
+        lineChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.labels,
+                datasets: [
+                    {
+                        label: 'Understanding',
+                        data: chartData.understanding,
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Debugging',
+                        data: chartData.debugging,
+                        borderColor: '#0891b2',
+                        backgroundColor: 'rgba(8, 145, 178, 0.1)',
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Completion',
+                        data: chartData.completion,
+                        borderColor: '#059669',
+                        backgroundColor: 'rgba(5, 150, 105, 0.1)',
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 10
+                    }
+                }
+            }
+        });
+    }
+    
+    // Load individual student data
+    function loadStudentData() {
+        const studentId = document.getElementById('studentSelect').value;
+        if (!studentId) {
+            alert('Please select a student');
+            return;
+        }
+        
+        showLoading();
+        
+        fetch(`/api/dashboard/student/${studentId}`)
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+                
+                // Update metrics
+                document.getElementById('student-understanding').textContent = data.understanding_score.toFixed(1);
+                document.getElementById('student-debugging').textContent = data.debugging_score.toFixed(1);
+                document.getElementById('student-completion').textContent = data.completion_score.toFixed(1);
+                document.getElementById('student-performance').textContent = data.overall_performance.toFixed(1);
+                
+                // Show metrics
+                document.getElementById('student-metrics').style.display = 'grid';
+                document.getElementById('student-charts').style.display = 'flex';
+                
+                // Render student charts
+                renderStudentBarChart(data);
+                renderGaugeChart(data);
+                
+                // Scroll to charts
+                document.getElementById('student-charts').scrollIntoView({ behavior: 'smooth' });
+            })
+            .catch(err => {
+                hideLoading();
+                console.error('Error loading student data:', err);
+                alert('Error loading student data');
+            });
+    }
+    
+    // Render Student Bar Chart
+    function renderStudentBarChart(studentData) {
+        const ctx = document.getElementById('studentBarChart').getContext('2d');
+        if (studentBarChart) studentBarChart.destroy();
+        
+        studentBarChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Understanding', 'Debugging', 'Completion'],
+                datasets: [{
+                    label: 'Score',
+                    data: [
+                        studentData.understanding_score,
+                        studentData.debugging_score,
+                        studentData.completion_score
+                    ],
+                    backgroundColor: ['#2563eb', '#0891b2', '#059669'],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 10
+                    }
+                }
+            }
+        });
+    }
+    
+    // Render Gauge Chart (Cognitive Load)
+    function renderGaugeChart(studentData) {
+        const ctx = document.getElementById('gaugeChart').getContext('2d');
+        if (gaugeChart) gaugeChart.destroy();
+        
+        const load = studentData.cognitive_load;
+        const category = studentData.cl_category;
+        const color = category === 'High' ? '#fca5a5' : category === 'Medium' ? '#fed7aa' : '#86efac';
+        
+        gaugeChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Load', 'Remaining'],
+                datasets: [{
+                    data: [load, 100 - load],
+                    backgroundColor: [color, '#e2e8f0'],
+                    borderColor: 'white',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.parsed + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Add text in center
+        const parent = document.getElementById('gaugeChart').parentElement;
+        parent.innerHTML += `<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 10; pointer-events: none;">
+            <div style="font-size: 2rem; font-weight: 700; color: #2563eb;">${load.toFixed(1)}%</div>
+            <div style="font-size: 0.9rem; color: #64748b;">${category} Load</div>
+        </div>`;
+    }
+    
+    // Initialize DataTable
+    function initializeDataTable() {
+        fetch('/api/dashboard/table-data')
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.getElementById('dataTable').querySelector('tbody');
+                tableBody.innerHTML = '';
+                
+                data.data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    const cognitiveLoad = row.Cognitive_Load_Avg;
+                    const category = row.CL_Category;
+                    
+                    let colorClass = '';
+                    if (cognitiveLoad < 20) colorClass = 'low';
+                    else if (cognitiveLoad < 50) colorClass = 'medium';
+                    else colorClass = 'high';
+                    
+                    tr.innerHTML = `
+                        <td>${row['Student ID'] || row.index}</td>
+                        <td>${row.Understanding_Score.toFixed(2)}</td>
+                        <td>${row.Debugging_Score.toFixed(2)}</td>
+                        <td>${row.Completion_Score.toFixed(2)}</td>
+                        <td><span class="color-coded ${colorClass}">${row.Cognitive_Load_Avg.toFixed(1)}%</span></td>
+                        <td>${category}</td>
+                        <td>${row.Overall_Performance.toFixed(2)}/10</td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+                
+                // Initialize DataTables
+                if (dataTable) dataTable.destroy();
+                dataTable = new DataTable('#dataTable', {
+                    pageLength: 10,
+                    dom: 'lrtip',
+                    order: [[4, 'desc']]
+                });
+            })
+            .catch(err => console.error('Error loading table:', err));
+    }
+    
+    // Export to CSV
+    function exportToCSV() {
+        window.location.href = '/api/dashboard/export-csv';
+    }
+    
+    // Filter table by cognitive load
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterSelect = document.getElementById('filterCognitive');
+        if (filterSelect) {
+            filterSelect.addEventListener('change', function() {
+                // Implement table filtering
+                console.log('Filter changed:', this.value);
+            });
+        }
+    });
+</script>
+{% endblock %}

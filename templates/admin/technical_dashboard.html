@@ -1,0 +1,360 @@
+{% extends "base.html" %}
+{% block title %}Technical Analysis Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chart-section {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+    
+    .chart-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .chart-container {
+        position: relative;
+        height: 350px;
+        margin-bottom: 1rem;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-box {
+        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+    }
+    
+    .stat-box h6 {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        opacity: 0.9;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-box .value {
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+    
+    .metadata {
+        background: #f8fafc;
+        border-left: 4px solid #2563eb;
+        padding: 1rem;
+        border-radius: 6px;
+        margin-bottom: 2rem;
+    }
+    
+    .metadata dt {
+        font-weight: 600;
+        color: #1e293b;
+        margin-top: 0.75rem;
+    }
+    
+    .metadata dd {
+        color: #64748b;
+        margin-left: 2rem;
+        margin-bottom: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div style="margin-bottom: 2rem;">
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h1><i class="bi bi-graph-up"></i> Technical Analysis Dashboard</h1>
+                <p>Bloom's Taxonomy Weighted Technical Cognitive Analysis</p>
+            </div>
+            <div class="col-auto">
+                <a href="/admin/technical-download/{{ analysis.id }}" class="btn btn-primary">
+                    <i class="bi bi-download"></i> Download Enriched Dataset
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Analysis Metadata -->
+<div class="metadata">
+    <h5 class="mb-3">{{ analysis.title }}</h5>
+    <dl class="row">
+        <dt class="col-sm-3">Uploaded By</dt>
+        <dd class="col-sm-9">{{ analysis.uploaded_by }} on {{ analysis.created_at.strftime('%Y-%m-%d %H:%M') }}</dd>
+        
+        <dt class="col-sm-3">Records Processed</dt>
+        <dd class="col-sm-9">{{ analysis.rows_count }} students</dd>
+        
+        {% if analysis.description %}
+        <dt class="col-sm-3">Description</dt>
+        <dd class="col-sm-9">{{ analysis.description }}</dd>
+        {% endif %}
+    </dl>
+</div>
+
+<!-- Summary Statistics -->
+<div class="stats-grid">
+    <div class="stat-box">
+        <h6>CUI Mean</h6>
+        <div class="value" id="cui-mean">-</div>
+    </div>
+    <div class="stat-box">
+        <h6>CDI Mean</h6>
+        <div class="value" id="cdi-mean">-</div>
+    </div>
+    <div class="stat-box">
+        <h6>CCI Mean</h6>
+        <div class="value" id="cci-mean">-</div>
+    </div>
+    <div class="stat-box">
+        <h6>CL1 Mean</h6>
+        <div class="value" id="cl1-mean">-</div>
+    </div>
+</div>
+
+<!-- VISUALIZATION 1: Core Technical Comparison -->
+<div class="chart-section">
+    <div class="chart-title">
+        <i class="bi bi-bar-chart"></i> 1. Core Technical Indices Comparison
+    </div>
+    <p class="text-muted" style="font-size: 0.9rem;">Mean values of Code Understanding Index (CUI), Code Debugging Index (CDI), and Code Completion Index (CCI)</p>
+    <div class="chart-container">
+        <canvas id="barChartCoreIndices"></canvas>
+    </div>
+</div>
+
+<!-- VISUALIZATION 2: Bloom Contribution Stacked Bar -->
+<div class="chart-section">
+    <div class="chart-title">
+        <i class="bi bi-bar-chart-fill"></i> 2. Bloom's Taxonomy Contribution Analysis
+    </div>
+    <p class="text-muted" style="font-size: 0.9rem;">T1 (Understanding × 0.6), T2 (Debugging × 0.2), T3 (Completion × 0.2) contribution to CL1</p>
+    <div class="chart-container">
+        <canvas id="stackedBarBloom"></canvas>
+    </div>
+</div>
+
+<!-- VISUALIZATION 3: Radar Chart (Skill Profile) -->
+<div class="chart-section">
+    <div class="chart-title">
+        <i class="bi bi-diagram-3"></i> 3. Skill Profile Visualization (Radar)
+    </div>
+    <p class="text-muted" style="font-size: 0.9rem;">Aggregated skill profile across Understanding, Debugging, and Completion dimensions</p>
+    <div class="chart-container">
+        <canvas id="radarSkillProfile"></canvas>
+    </div>
+</div>
+
+<!-- VISUALIZATION 4: Distribution Analysis (Histogram/Box Plot) -->
+<div class="chart-section">
+    <div class="chart-title">
+        <i class="bi bi-graph-up"></i> 4. Technical Proficiency Distribution
+    </div>
+    <p class="text-muted" style="font-size: 0.9rem;">Distribution of CL1_Div3_Scaled scores showing variance and outliers across all students</p>
+    <div class="chart-container">
+        <canvas id="histogramDistribution"></canvas>
+    </div>
+</div>
+
+<!-- Bloom Equations Reference -->
+<div class="card mt-4">
+    <div class="card-header">
+        <i class="bi bi-info-circle"></i> Computation Reference
+    </div>
+    <div class="card-body">
+        <p class="mb-2"><strong>Bloom's Taxonomy Weighting:</strong></p>
+        <pre style="background: #f8fafc; padding: 1rem; border-radius: 6px; font-size: 0.9rem;">
+T1 = CUI × 0.6              (Understanding - 60% weight)
+T2 = CDI × 0.2              (Debugging - 20% weight)
+T3 = CCI × 0.2              (Completion - 20% weight)
+
+CL1 = T1 + T2 + T3          (Technical Composite Index)
+CL1_Div3 = CL1 / 3          (Average across indices)
+CL1_Div3_Scaled = CL1_Div3 × 0.5  (Scaled technical proficiency)</pre>
+        <p class="text-muted" style="font-size: 0.9rem; margin-top: 1rem;">
+            <i class="bi bi-check-circle"></i> All enriched columns are available in the downloadable Excel file
+        </p>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Load chart data on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch(`/api/technical/chart-data/{{ analysis.id }}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Error:', data.error);
+                    return;
+                }
+                
+                // Update stat boxes
+                document.getElementById('cui-mean').textContent = data.stats.cui_mean.toFixed(3);
+                document.getElementById('cdi-mean').textContent = data.stats.cdi_mean.toFixed(3);
+                document.getElementById('cci-mean').textContent = data.stats.cci_mean.toFixed(3);
+                document.getElementById('cl1-mean').textContent = data.stats.cl1_mean.toFixed(3);
+                
+                // Render all 4 charts
+                renderCoreIndicesBar(data.stats);
+                renderBloomStackedBar(data.stats);
+                renderSkillProfileRadar(data.stats);
+                renderDistributionHistogram(data.stats);
+            })
+            .catch(err => console.error('Error loading data:', err));
+    });
+    
+    // Chart 1: Core Technical Indices Bar Chart
+    function renderCoreIndicesBar(stats) {
+        const ctx = document.getElementById('barChartCoreIndices').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['CUI', 'CDI', 'CCI'],
+                datasets: [{
+                    label: 'Mean Value',
+                    data: [stats.cui_mean, stats.cdi_mean, stats.cci_mean],
+                    backgroundColor: ['#2563eb', '#0891b2', '#059669'],
+                    borderRadius: 6,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 1
+                    }
+                }
+            }
+        });
+    }
+    
+    // Chart 2: Bloom's Contribution Stacked Bar
+    function renderBloomStackedBar(stats) {
+        const ctx = document.getElementById('stackedBarBloom').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['T1 (Understanding)', 'T2 (Debugging)', 'T3 (Completion)', 'Total CL1'],
+                datasets: [{
+                    label: 'Mean Contribution',
+                    data: [stats.t1_mean, stats.t2_mean, stats.t3_mean, stats.cl1_mean],
+                    backgroundColor: ['#3b82f6', '#06b6d4', '#10b981', '#f59e0b'],
+                    borderRadius: 6,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: { beginAtZero: true }
+                }
+            }
+        });
+    }
+    
+    // Chart 3: Radar Chart (Skill Profile)
+    function renderSkillProfileRadar(stats) {
+        const ctx = document.getElementById('radarSkillProfile').getContext('2d');
+        new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['Understanding (T1)', 'Debugging (T2)', 'Completion (T3)'],
+                datasets: [{
+                    label: 'Mean Skill Level',
+                    data: [stats.t1_mean, stats.t2_mean, stats.t3_mean],
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37, 99, 235, 0.2)',
+                    pointBackgroundColor: '#2563eb',
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: true }
+                },
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 1
+                    }
+                }
+            }
+        });
+    }
+    
+    // Chart 4: Distribution Histogram
+    function renderDistributionHistogram(stats) {
+        const ctx = document.getElementById('histogramDistribution').getContext('2d');
+        
+        // Create histogram bins
+        const values = stats.cl1_div3_scaled_dist;
+        const bins = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
+        const binCounts = bins.map((bin, i) => {
+            const nextBin = bins[i + 1] || 1;
+            return values.filter(v => v >= bin && v < nextBin).length;
+        });
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: bins.map(b => b.toFixed(1)),
+                datasets: [{
+                    label: 'Number of Students',
+                    data: binCounts,
+                    backgroundColor: '#2563eb',
+                    borderRadius: 6,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

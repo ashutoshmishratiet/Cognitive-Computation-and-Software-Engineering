@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Technical Analysis Upload - Admin{% endblock %}
+
+{% block content %}
+
+<div style="margin-bottom: 2rem;">
+    <div class="page-header">
+        <h1><i class="bi bi-file-earmark-spreadsheet"></i> Technical Data Upload</h1>
+        <p>Upload normalized technical indices (CUI, CDI, CCI) for Bloom's taxonomy analysis</p>
+    </div>
+</div>
+
+<!-- Admin Menu Tabs -->
+<ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/dashboard">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="/admin/advanced-calc">
+            <i class="bi bi-calculator"></i> Technical Analysis
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/data-manager">
+            <i class="bi bi-folder-check"></i> Data Manager
+        </a>
+    </li>
+</ul>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-cloud-upload"></i> Upload Dataset
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info mb-4">
+                    <strong>Requirements:</strong>
+                    <ul class="mb-0">
+                        <li><strong>Required Columns:</strong> CUI, CDI, CCI (normalized 0–1 range)</li>
+                        <li><strong>Optional:</strong> Student ID / PID column</li>
+                        <li><strong>Formats:</strong> Excel (.xlsx) or CSV (.csv)</li>
+                        <li>❌ Raw columns (U_C, U_W, etc.) will be ignored if present</li>
+                    </ul>
+                </div>
+
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="form-group mb-3">
+                        <label class="form-label">Dataset File *</label>
+                        <input type="file" class="form-control" name="file" accept=".xlsx,.csv" required>
+                        <small class="text-muted">Upload Excel (.xlsx) or CSV (.csv) file</small>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="form-label">Analysis Title *</label>
+                        <input type="text" class="form-control" name="title" placeholder="e.g., Q1 2026 Technical Analysis" required>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label class="form-label">Description (Optional)</label>
+                        <textarea class="form-control" name="description" rows="4" placeholder="Study methodology, data source, research notes..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-arrow-up-circle"></i> Upload & Process
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                Validation Rules
+            </div>
+            <div class="card-body">
+                <h6 class="mb-3">The system will:</h6>
+                <ul style="font-size: 0.9rem;">
+                    <li>✅ Validate CUI, CDI, CCI presence</li>
+                    <li>✅ Check value ranges [0, 1]</li>
+                    <li>✅ Compute T1 = CUI × 0.6</li>
+                    <li>✅ Compute T2 = CDI × 0.2</li>
+                    <li>✅ Compute T3 = CCI × 0.2</li>
+                    <li>✅ Calculate CL1 = T1 + T2 + T3</li>
+                    <li>✅ Export enriched dataset</li>
+                    <li>✅ Generate 4 visualizations</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                Output Deliverables
+            </div>
+            <div class="card-body">
+                <h6 class="mb-3">After processing, you'll get:</h6>
+                <ol style="font-size: 0.9rem;">
+                    <li>Enriched Excel file (download)</li>
+                    <li>Bar chart: CUI vs CDI vs CCI</li>
+                    <li>Stacked bar: T1, T2, T3 contribution</li>
+                    <li>Radar chart: Skill profile</li>
+                    <li>Box plot: Distribution analysis</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

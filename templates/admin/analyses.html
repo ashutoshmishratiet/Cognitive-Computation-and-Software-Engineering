@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% block title %}My Analyses - Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .analysis-row {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 2rem;
+        transition: box-shadow 0.2s;
+    }
+    
+    .analysis-row:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .analysis-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .status-pill {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .status-pill.status-draft {
+        background: #fef3c7;
+        color: #b45309;
+    }
+    
+    .analysis-meta {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        margin-top: 0.75rem;
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .status-draft {
+        background: #e2e3e5;
+        color: #383d41;
+    }
+    
+    .status-published {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .analysis-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #6c757d;
+    }
+    
+    .empty-state-icon {
+        font-size: 3rem;
+        opacity: 0.5;
+        margin-bottom: 1rem;
+    }
+    
+    .filter-bar {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .filter-button {
+        padding: 0.5rem 1rem;
+        border: 2px solid #dee2e6;
+        background: white;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    
+    .filter-button:hover {
+        border-color: #667eea;
+        color: #667eea;
+    }
+    
+    .filter-button.active {
+        background: #667eea;
+        border-color: #667eea;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% if analyses %}
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-list-check"></i> Analysis Results
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Data File</th>
+                        <th>Created</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for analysis in analyses %}
+                    <tr>
+                        <td>
+                            <strong>{{ analysis.title }}</strong>
+                            <br><small class="text-muted">{{ analysis.description[:60] if analysis.description else 'No description' }}</small>
+                        </td>
+                        <td>
+                            <i class="bi bi-file-excel"></i> 
+                            {{ analysis.data_file.original_name|truncate(30) }}
+                        </td>
+                        <td>{{ analysis.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                            {% if analysis.is_published %}
+                            <span class="badge bg-success"><i class="bi bi-check-circle"></i> Published</span>
+                            {% else %}
+                            <span class="badge bg-warning"><i class="bi bi-clock"></i> Draft</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="/admin/analysis/{{ analysis.id }}" class="btn btn-info">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                                {% if not analysis.is_published %}
+                                <form method="POST" action="/admin/publish/{{ analysis.id }}" style="display:inline;">
+                                    <button type="submit" class="btn btn-success" onclick="return confirm('Publish this analysis?')">
+                                        <i class="bi bi-upload"></i> Publish
+                                    </button>
+                                </form>
+                                <a href="/admin/delete-analysis/{{ analysis.id }}" class="btn btn-danger" 
+                                   onclick="return confirm('Delete this analysis?')">
+                                    <i class="bi bi-trash"></i> Delete
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <div class="card-body">
+        <div style="text-align: center; padding: 3rem 1rem;">
+            <div style="font-size: 3.5rem; opacity: 0.3; color: #2563eb; margin-bottom: 1rem;">
+                <i class="bi bi-box-seam"></i>
+            </div>
+            <h4 style="color: #1e293b;">No Analyses Yet</h4>
+            <p style="color: #64748b;">Start by uploading data and creating an analysis to see it here.</p>
+            <a href="/admin/analyze" class="btn btn-primary mt-3">
+                <i class="bi bi-plus-circle"></i> Create First Analysis
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

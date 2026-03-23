@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}My Profile - User{% endblock %}
+
+{% block content %}
+
+<div style="margin-bottom: 2rem;">
+    <div class="page-header">
+        <h1><i class="bi bi-person-circle"></i> My Profile</h1>
+        <p>Manage your account and view your analysis history</p>
+    </div>
+</div>
+
+<!-- User Menu Tabs -->
+<ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+        <a class="nav-link" href="/dashboard">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="/profile">
+            <i class="bi bi-person-circle"></i> Profile
+        </a>
+    </li>
+</ul>
+
+<div class="row">
+    <div class="col-lg-4">
+        <!-- Profile Card -->
+        <div class="card">
+            <div class="card-header">Account Information</div>
+            <div class="card-body text-center">
+                <div style="width: 100px; height: 100px; margin: 0 auto 1rem; background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <h4 style="color: #1f2937;">{{ session.username }}</h4>
+                <p class="text-muted mb-3">Regular User</p>
+                <hr>
+                <div class="text-start">
+                    <p class="mb-2">
+                        <span style="color: #6c757d;">Joined Date:</span><br>
+                        <strong>{{ user_info.created_at.strftime('%B %d, %Y') if user_info else 'N/A' }}</strong>
+                    </p>
+                    <p class="mb-0">
+                        <span style="color: #6c757d;">Total Analyses Viewed:</span><br>
+                        <strong>{{ total_analyses }}</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <!-- Analysis History -->
+        <div class="card">
+            <div class="card-header">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>Your Published Analyses</span>
+                    <span class="badge" style="background-color: #2563eb; padding: 0.5rem 1rem;">{{ published_analyses|length }}</span>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if published_analyses %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead style="background-color: #f8fafc;">
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Created By</th>
+                                    <th>Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for analysis in published_analyses %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ analysis.title }}</strong>
+                                        {% if analysis.description %}
+                                            <br><small class="text-muted">{{ analysis.description[:50] }}{% if analysis.description|length > 50 %}...{% endif %}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ analysis.created_by }}</td>
+                                    <td style="color: #6c757d;">{{ analysis.published_at.strftime('%Y-%m-%d %H:%M') if analysis.published_at else 'N/A' }}</td>
+                                    <td>
+                                        <a href="{{ url_for('user_view_analysis', analysis_id=analysis.id) }}" class="btn btn-sm btn-primary">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info mb-0">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>No analyses yet</strong> - Published analyses will appear here
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Account Statistics -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="metric-card" style="text-align: center;">
+                    <h5 style="color: #6c757d;">Last Viewed Analysis</h5>
+                    {% if last_viewed %}
+                        <p style="color: #2563eb; font-size: 1.1rem; margin: 0;">{{ last_viewed }}</p>
+                    {% else %}
+                        <p style="color: #6c757d; margin: 0;">No views yet</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="metric-card" style="text-align: center;">
+                    <h5 style="color: #6c757d;">Account Status</h5>
+                    <span class="badge" style="background-color: #28a745; color: white; padding: 0.5rem 1rem;">Active</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #e9ecef; text-align: center; color: #6c757d;">
+    <p><i class="bi bi-info-circle"></i> Need help? Contact your administrator</p>
+</div>
+
+{% endblock %}

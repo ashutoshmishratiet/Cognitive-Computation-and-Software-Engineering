@@ -1,0 +1,570 @@
+{% extends "base.html" %}
+
+{% block title %}Performance Calculator - Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .calculator-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+    
+    .guide-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+    
+    .guide-section h2 {
+        color: #1e293b;
+        border-left: 4px solid #2563eb;
+        padding-left: 1rem;
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+    }
+    
+    .guide-section h3 {
+        color: #475569;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+    
+    .formula-box {
+        background: #f8fafc;
+        border-left: 4px solid #2563eb;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 6px;
+        font-family: 'Courier New', monospace;
+        overflow-x: auto;
+    }
+    
+    .formula-title {
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+    
+    .formula-text {
+        color: #475569;
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+    
+    .step-list {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .step-list li {
+        padding: 1rem;
+        margin: 0.5rem 0;
+        background: #f1f5f9;
+        border-radius: 6px;
+        border-left: 3px solid #2563eb;
+    }
+    
+    .step-list strong {
+        color: #1e293b;
+    }
+    
+    .component-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin: 1rem 0;
+    }
+    
+    .component-card.technical {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .component-card.emotional {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    
+    .component-card.combined {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    
+    .component-card h3 {
+        color: white;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+    }
+    
+    .component-card p {
+        margin-bottom: 0;
+        font-size: 0.95rem;
+    }
+    
+    .example-data {
+        background: #1e293b;
+        color: #e2e8f0;
+        padding: 1.5rem;
+        border-radius: 6px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        overflow-x: auto;
+        margin: 1rem 0;
+        border-left: 4px solid #10b981;
+    }
+    
+    .table-responsive {
+        margin: 1rem 0;
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    table thead th {
+        background: #2563eb;
+        color: white;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+    }
+    
+    table tbody td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 0.9rem;
+    }
+    
+    table tbody tr:hover {
+        background: #f1f5f9;
+    }
+    
+    .code-block {
+        background: #1e293b;
+        color: #e2e8f0;
+        padding: 1.5rem;
+        border-radius: 6px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.85rem;
+        overflow-x: auto;
+        margin: 1rem 0;
+        border-left: 4px solid #10b981;
+        line-height: 1.5;
+    }
+    
+    .code-block .string { color: #86efac; }
+    .code-block .number { color: #fbbf24; }
+    .code-block .keyword { color: #818cf8; }
+    .code-block .comment { color: #94a3b8; }
+    
+    .info-banner {
+        background: #eff6ff;
+        border-left: 4px solid #2563eb;
+        padding: 1rem;
+        border-radius: 6px;
+        margin: 1rem 0;
+    }
+    
+    .info-banner strong {
+        color: #1e40af;
+    }
+    
+    .success-badge {
+        background: #dcfce7;
+        color: #166534;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+    
+    .nav-tabs-config {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    
+    .nav-tabs-config .tab-btn {
+        padding: 1rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        font-weight: 600;
+        color: #64748b;
+        transition: all 0.3s ease;
+    }
+    
+    .nav-tabs-config .tab-btn:hover {
+        color: #2563eb;
+    }
+    
+    .nav-tabs-config .tab-btn.active {
+        color: #2563eb;
+        border-bottom-color: #2563eb;
+    }
+    
+    .tab-content {
+        display: none;
+    }
+    
+    .tab-content.active {
+        display: block;
+    }
+    
+    .range-badge {
+        display: inline-block;
+        background: #f1f5f9;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.85rem;
+        color: #1e293b;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="calculation-guide">
+    <!-- Header -->
+    <div class="guide-section">
+        <h1><i class="bi bi-calculator"></i> Cognitive & Emotional Performance Scoring System</h1>
+        <p class="text-muted mb-0">Complete Implementation Guide for Technical and Emotional Performance Calculation</p>
+    </div>
+    
+    <!-- Tab Navigation -->
+    <div class="nav-tabs-config">
+        <button class="tab-btn active" onclick="showTab(event, 'overview')">Overview</button>
+        <button class="tab-btn" onclick="showTab(event, 'technical')">Technical Score</button>
+        <button class="tab-btn" onclick="showTab(event, 'emotional')">Emotional Score</button>
+        <button class="tab-btn" onclick="showTab(event, 'combined')">Combined Score</button>
+        <button class="tab-btn" onclick="showTab(event, 'example')">Example</button>
+        <button class="tab-btn" onclick="showTab(event, 'code')">Code Template</button>
+    </div>
+    
+    <!-- TAB 1: OVERVIEW -->
+    <div id="overview" class="tab-content active">
+        <div class="guide-section">
+            <h2>System Overview</h2>
+            <p>This system combines <strong>Technical Performance</strong> (Understanding, Debugging, Completion) with <strong>Emotional/Affective Dynamics</strong> (Likert-scale Before/After responses) to provide a comprehensive performance score.</p>
+            
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="component-card technical">
+                        <h3><i class="bi bi-cpu"></i> Technical</h3>
+                        <p>Bloom's Taxonomy-weighted metrics measuring cognitive performance</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="component-card emotional">
+                        <h3><i class="bi bi-heart"></i> Emotional</h3>
+                        <p>Likert-scale assessment of emotional engagement before/after</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="component-card combined">
+                        <h3><i class="bi bi-graph-up"></i> Combined</h3>
+                        <p>Integrated performance score for holistic assessment</p>
+                    </div>
+                </div>
+            </div>
+            
+            <h3 class="mt-4">Key Components</h3>
+            <ul class="step-list">
+                <li><strong>3 Knowledge Domains:</strong> Understanding (60%), Debugging (20%), Completion (20%)</li>
+                <li><strong>Raw Scoring:</strong> Correct (+1.0), Wrong (-0.25), Not Attempted (0.0)</li>
+                <li><strong>T-Score Scaling:</strong> Transform [-0.25, 1] to [0, 1] range</li>
+                <li><strong>Emotion Assessment:</strong> 7 Likert questions (1-5 scale), Before & After</li>
+                <li><strong>Final Score Range:</strong> [0, 0.75] (0.5 technical + 0.25 emotional)</li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- TAB 2: TECHNICAL SCORE -->
+    <div id="technical" class="tab-content">
+        <div class="guide-section">
+            <h2>Technical Score Calculation</h2>
+            
+            <h3>Input Data Structure</h3>
+            <p>For each of 3 domains (Understanding, Debugging, Completion):</p>
+            <div class="info-banner">
+                <strong>Columns needed:</strong> {Domain}_Correct, {Domain}_Wrong, {Domain}_NotAttempted
+            </div>
+            
+            <h3>Step 1: Calculate Raw Scores</h3>
+            <div class="formula-box">
+                <div class="formula-title">Formula:</div>
+                <div class="formula-text">
+                    Raw_Score = (Correct × 1.0) + (Wrong × -0.25) + (NotAttempted × 0.0)<br/>
+                    Example: (3 × 1.0) + (1 × -0.25) + (1 × 0.0) = 2.75
+                </div>
+            </div>
+            
+            <h3>Step 2: Normalize by Question Count</h3>
+            <div class="formula-box">
+                <div class="formula-title">Formula:</div>
+                <div class="formula-text">
+                    Domain_S = Raw_Score / 5.0<br/>
+                    Example: 2.75 / 5.0 = 0.55
+                </div>
+            </div>
+            
+            <h3>Step 3: Apply Bloom's Taxonomy Weights</h3>
+            <div class="formula-box">
+                <div class="formula-title">Weights (Research-based):</div>
+                <div class="formula-text">
+                    Understanding: 60% (foundational knowledge)<br/>
+                    Debugging: 20% (problem-solving skill)<br/>
+                    Completion: 20% (task execution)
+                </div>
+            </div>
+            
+            <h3>Step 4: Scale to 0-1 Range (T-Score)</h3>
+            <div class="formula-box">
+                <div class="formula-title">Formula:</div>
+                <div class="formula-text">
+                    T_Score = (Domain_Value + 0.25) / 1.25<br/>
+                    T_Score = Clip(T_Score, 0.0, 1.0)  // Ensure within bounds
+                </div>
+            </div>
+            
+            <h3>Step 5-7: Comprehensive Learning Level (CL1)</h3>
+            <div class="formula-box">
+                <div class="formula-title">Formula:</div>
+                <div class="formula-text">
+                    CL1 = T1 + T2 + T3  (can range 0 to 3)<br/>
+                    CL1_Div3 = CL1 / 3.0  (normalized to 0-1)<br/>
+                    CL1_Div3_Scaled = CL1_Div3 × 0.5  (final technical score, 0-0.5)
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- TAB 3: EMOTIONAL SCORE -->
+    <div id="emotional" class="tab-content">
+        <div class="guide-section">
+            <h2>Emotional/Affective Performance Calculation</h2>
+            
+            <h3>Input Data Structure</h3>
+            <p>7 Likert-scale questions measured at 2 time points:</p>
+            <div class="info-banner">
+                <strong>Columns needed:</strong> P1_Before, P1_After, P2_Before, P2_After, ..., P7_Before, P7_After<br/>
+                <strong>Response Scale:</strong> 1 = Strongly Disagree, 5 = Strongly Agree
+            </div>
+            
+            <h3>Step 1: Convert to Decimal</h3>
+            <div class="formula-box">
+                <div class="formula-title">Formula:</div>
+                <div class="formula-text">
+                    P{i}_Decimal = Response / 5.0<br/>
+                    Example: 4 / 5.0 = 0.8
+                </div>
+            </div>
+            
+            <h3>Step 2-3: Calculate Totals & Averages</h3>
+            <div class="formula-box">
+                <div class="formula-title">Formula:</div>
+                <div class="formula-text">
+                    Total_Decimal = Sum(P1_Decimal ... P7_Decimal)<br/>
+                    Average (B1/A1) = Total_Decimal / 7.0
+                </div>
+            </div>
+            
+            <h3>Step 4-6: Scale & Combine</h3>
+            <div class="formula-box">
+                <div class="formula-title">Formula:</div>
+                <div class="formula-text">
+                    B1_Scaled = B1 × 0.5<br/>
+                    A1_Scaled = A1 × 0.5<br/>
+                    Emotion_Value = (B1_Scaled + A1_Scaled) / 2.0<br/>
+                    Emotion_Value_Scaled = Emotion_Value × 0.5  (final emotion score, 0-0.25)
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- TAB 4: COMBINED SCORE -->
+    <div id="combined" class="tab-content">
+        <div class="guide-section">
+            <h2>Combined Performance Score</h2>
+            
+            <h3>Integration Formula</h3>
+            <div class="formula-box">
+                <div class="formula-title">Combined Performance:</div>
+                <div class="formula-text">
+                    Combined_Performance = CL1_Div3_Scaled + Emotion_Value_Scaled
+                </div>
+            </div>
+            
+            <h3>Score Range & Interpretation</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Component</th>
+                            <th>Input Range</th>
+                            <th>Output Range</th>
+                            <th>Weight</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Technical (CL1_Div3_Scaled)</strong></td>
+                            <td>[0, 1]</td>
+                            <td>[0, 0.5]</td>
+                            <td>66.7%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Emotional (Emotion_Value_Scaled)</strong></td>
+                            <td>[0.2, 5]</td>
+                            <td>[0, 0.25]</td>
+                            <td>33.3%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Combined</strong></td>
+                            <td>-</td>
+                            <td><span class="range-badge">[0, 0.75]</span></td>
+                            <td>100%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <h3>Performance Levels</h3>
+            <ul class="step-list">
+                <li><strong>High Performance:</strong> 0.50 - 0.75 (67% - 100%)</li>
+                <li><strong>Moderate Performance:</strong> 0.25 - 0.50 (33% - 67%)</li>
+                <li><strong>Low Performance:</strong> 0.00 - 0.25 (0% - 33%)</li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- TAB 5: EXAMPLE -->
+    <div id="example" class="tab-content">
+        <div class="guide-section">
+            <h2>Complete Example Walkthrough</h2>
+            
+            <h3>Student Response Data</h3>
+            <div class="example-data">
+Understanding: 3 Correct, 1 Wrong, 1 Not Attempted<br/>
+Debugging: 4 Correct, 0 Wrong, 1 Not Attempted<br/>
+Completion: 5 Correct, 0 Wrong, 0 Not Attempted<br/>
+<br/>
+Emotion Before: [5, 4, 4, 3, 4, 4, 5] → Average = 4.14<br/>
+Emotion After: [5, 5, 4, 4, 5, 4, 5] → Average = 4.57
+            </div>
+            
+            <h3>Step-by-Step Calculation</h3>
+            <h4 style="color: #667eea; margin-top: 1.5rem;">Technical Score Calculation:</h4>
+            <ul class="step-list">
+                <li><strong>Understanding:</strong> Raw=2.75 → S=0.55 → S1=0.33 → T1=0.464</li>
+                <li><strong>Debugging:</strong> Raw=4.0 → S=0.8 → S1=0.16 → T2=0.688</li>
+                <li><strong>Completion:</strong> Raw=5.0 → S=1.0 → S1=0.2 → T3=0.8</li>
+                <li><strong>CL1:</strong> 0.464 + 0.688 + 0.8 = 1.952</li>
+                <li><strong>CL1_Div3:</strong> 1.952 / 3 = 0.651</li>
+                <li><strong>CL1_Div3_Scaled:</strong> 0.651 × 0.5 = <span class="success-badge">0.326</span></li>
+            </ul>
+            
+            <h4 style="color: #f5576c; margin-top: 1.5rem;">Emotional Score Calculation:</h4>
+            <ul class="step-list">
+                <li><strong>Before Avg:</strong> 4.14 / 5 = 0.828 → B1 = 0.118 → B1_Scaled = 0.059</li>
+                <li><strong>After Avg:</strong> 4.57 / 5 = 0.914 → A1 = 0.131 → A1_Scaled = 0.065</li>
+                <li><strong>Emotion_Value:</strong> (0.059 + 0.065) / 2 = 0.062</li>
+                <li><strong>Emotion_Value_Scaled:</strong> 0.062 × 0.5 = <span class="success-badge">0.031</span></li>
+            </ul>
+            
+            <h4 style="color: #4facfe; margin-top: 1.5rem;">Combined Performance:</h4>
+            <ul class="step-list">
+                <li><strong>Final Score:</strong> 0.326 + 0.031 = <span class="success-badge">0.357</span> / 0.75</li>
+                <li><strong>Percentage:</strong> (0.357 / 0.75) × 100 = 47.6%</li>
+                <li><strong>Interpretation:</strong> ✓ Moderate-to-High Performance</li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- TAB 6: CODE TEMPLATE -->
+    <div id="code" class="tab-content">
+        <div class="guide-section">
+            <h2>Python Implementation Template</h2>
+            
+            <h3>PerformanceCalculator Class</h3>
+            <div class="code-block">
+# Import at top of file<br/>
+<span class="keyword">from</span> calculate_scores import PerformanceCalculator<br/>
+<br/>
+# Create calculator instance<br/>
+calc = PerformanceCalculator()<br/>
+<br/>
+# Prepare student data<br/>
+student_data = {<br/>
+&nbsp;&nbsp;<span class="string">'understanding'</span>: {<span class="string">'correct'</span>: 3, <span class="string">'wrong'</span>: 1, <span class="string">'not_attempted'</span>: 1},<br/>
+&nbsp;&nbsp;<span class="string">'debugging'</span>: {<span class="string">'correct'</span>: 4, <span class="string">'wrong'</span>: 0, <span class="string">'not_attempted'</span>: 1},<br/>
+&nbsp;&nbsp;<span class="string">'completion'</span>: {<span class="string">'correct'</span>: 5, <span class="string">'wrong'</span>: 0, <span class="string">'not_attempted'</span>: 0},<br/>
+&nbsp;&nbsp;<span class="string">'emotion_before'</span>: [5, 4, 4, 3, 4, 4, 5],<br/>
+&nbsp;&nbsp;<span class="string">'emotion_after'</span>: [5, 5, 4, 4, 5, 4, 5]<br/>
+}<br/>
+<br/>
+# Calculate scores<br/>
+scores = calc.calculate(student_data)<br/>
+<br/>
+# Display results<br/>
+print(calc.format_results(scores))
+            </div>
+            
+            <h3>Output Example</h3>
+            <div class="code-block">
+============================================================<br/>
+PERFORMANCE SCORE SUMMARY<br/>
+============================================================<br/>
+<br/>
+[TECHNICAL PERFORMANCE]<br/>
+&nbsp;&nbsp;Understanding (T1): 0.4640<br/>
+&nbsp;&nbsp;Debugging (T2):     0.6880<br/>
+&nbsp;&nbsp;Completion (T3):    0.8000<br/>
+&nbsp;&nbsp;CL1 (Total):        1.9520<br/>
+&nbsp;&nbsp;→ Technical Score:  <span class="number">0.3260 / 0.5</span><br/>
+<br/>
+[EMOTIONAL ENGAGEMENT]<br/>
+&nbsp;&nbsp;Before Avg (B1):    0.1180<br/>
+&nbsp;&nbsp;After Avg (A1):     0.1310<br/>
+&nbsp;&nbsp;→ Emotion Score:    <span class="number">0.0310 / 0.25</span><br/>
+<br/>
+============================================================<br/>
+COMBINED PERFORMANCE: <span class="number">0.3570 / 0.75</span><br/>
+Performance Level:   <span class="number">47.6%</span><br/>
+Interpretation:      → Moderate Performance<br/>
+============================================================
+            </div>
+            
+            <div class="info-banner" style="margin-top: 2rem;">
+                <strong>Note:</strong> The complete PerformanceCalculator class is available in <code>calculate_scores.py</code>. It includes full error handling, support for missing data (NaN), and configurable scaling factors.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showTab(e, tabName) {
+    e.preventDefault();
+    
+    // Hide all tab contents
+    const contents = document.querySelectorAll('.tab-content');
+    contents.forEach(content => content.classList.remove('active'));
+    
+    // Remove active class from all buttons
+    const buttons = document.querySelectorAll('.tab-btn');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    
+    // Show selected tab content
+    document.getElementById(tabName).classList.add('active');
+    
+    // Add active class to clicked button
+    e.target.classList.add('active');
+}
+</script>
+{% endblock %}

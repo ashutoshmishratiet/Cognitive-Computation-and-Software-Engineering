@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+{% block title %}Published Analyses - User Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .analysis-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+    
+    .analysis-card:hover {
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+        transform: translateY(-2px);
+        border-color: #2563eb;
+    }
+    
+    .analysis-header {
+        margin-bottom: 1rem;
+    }
+    
+    .analysis-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+    
+    .analysis-description {
+        color: #64748b;
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+    }
+    
+    .analysis-meta {
+        display: flex;
+        gap: 1.5rem;
+        font-size: 0.85rem;
+        color: #64748b;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+    
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .analysis-footer {
+        margin-top: auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 1rem;
+        border-top: 1px solid #e2e8f0;
+    }
+    
+    .view-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1.2rem;
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    
+    .view-button:hover {
+        background: #1e40af;
+        text-decoration: none;
+        transform: translateX(2px);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #64748b;
+    }
+    
+    .empty-state-icon {
+        font-size: 3.5rem;
+        opacity: 0.3;
+        margin-bottom: 1rem;
+        color: #2563eb;
+    }
+    
+    .empty-state h4 {
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card-user {
+        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+    }
+    
+    .stat-card-user h5 {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        opacity: 0.9;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-card-user h2 {
+        font-size: 2rem;
+        margin: 0;
+        font-weight: 700;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div style="margin-bottom: 2rem;">
+    <div class="page-header">
+        <h1><i class="bi bi-graph-up"></i> Published Research Analyses</h1>
+        <p>Explore cognitive performance research and analysis results</p>
+    </div>
+</div>
+
+<!-- User Menu Tabs -->
+<ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+        <a class="nav-link active" href="/dashboard">
+            <i class="bi bi-graph-up"></i> Analyses
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('user_eeg_data') }}">
+            <i class="bi bi-bezier"></i> EEG Data
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/profile">
+            <i class="bi bi-person-circle"></i> Profile
+        </a>
+    </li>
+</ul>
+
+{% if published_analyses %}
+<!-- Statistics -->
+<div class="stats-container">
+    <div class="stat-card-user">
+        <h5>Total Analyses</h5>
+        <h2>{{ published_analyses|length }}</h2>
+    </div>
+    <div class="stat-card-user">
+        <h5>Total Participants</h5>
+        <h2>{{ total_participants }}</h2>
+    </div>
+    <div class="stat-card-user">
+        <h5>Research Areas</h5>
+        <h2>{{ research_areas|length }}</h2>
+    </div>
+</div>
+
+<!-- Analyses Grid -->
+<div class="row">
+    {% for analysis in published_analyses %}
+    <div class="col-lg-6 col-xl-4">
+        <div class="analysis-card">
+            <div class="analysis-header">
+                <div class="analysis-title">{{ analysis.title }}</div>
+                <div class="analysis-description">
+                    {{ analysis.description[:100] }}{% if analysis.description|length > 100 %}...{% endif %}
+                </div>
+            </div>
+            
+            <div class="analysis-meta">
+                <div class="meta-item">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span>{{ analysis.data_file.original_name|truncate(20) }}</span>
+                </div>
+                <div class="meta-item">
+                    <i class="bi bi-calendar"></i>
+                    <span>{{ analysis.published_at.strftime('%b %d, %Y') if analysis.published_at else 'Not Published' }}</span>
+                </div>
+            </div>
+            
+            <div class="analysis-footer">
+                <small class="text-muted">
+                    <i class="bi bi-people"></i> 
+                    {{ analysis.data_file.rows_count }} participants
+                </small>
+                <a href="/user/analysis/{{ analysis.id }}" class="view-button">
+                    View Analysis <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% else %}
+<!-- Empty State -->
+<div class="card">
+    <div class="card-body">
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="bi bi-inbox"></i>
+            </div>
+            <h4>No Analyses Shared Yet</h4>
+            <p>Administrators will share analysis results with you here.</p>
+            <p class="mt-3">Check back soon for new cognitive performance analyses!</p>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

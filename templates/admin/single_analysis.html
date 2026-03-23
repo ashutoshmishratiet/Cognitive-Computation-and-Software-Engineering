@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Single Student Analysis - Admin{% endblock %}
+{% block content %}
+
+<div style="margin-bottom: 2rem;">
+    <div class="page-header">
+        <h1><i class="bi bi-person-check"></i> Single Student Analysis</h1>
+        <p>Perform detailed analysis on individual student data</p>
+    </div>
+</div>
+
+<!-- Admin Menu Tabs -->
+<ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/dashboard">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/upload">
+            <i class="bi bi-cloud-upload"></i> Upload
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/data-manager">
+            <i class="bi bi-folder-check"></i> Data Manager
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="/admin/single-analysis">
+            <i class="bi bi-person-check"></i> Analysis
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/configuration">
+            <i class="bi bi-gear"></i> Settings
+        </a>
+    </li>
+</ul>
+
+{% if latest %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">Student Selection</div>
+            <div class="card-body">
+                <div class="form-group mb-3">
+                    <label class="form-label">Select Student (Row)</label>
+                    <select class="form-select form-select-lg" id="student_select">
+                        <option value="">-- Select a student --</option>
+                        {% for i in range(latest.rows_count) %}
+                        <option value="{{ i }}">Student {{ i + 1 }} (Row {{ i }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="loadStudentData()">
+                    <i class="bi bi-search"></i> Load Data
+                </button>
+            </div>
+        </div>
+        
+        <div class="card mt-3" id="data_card" style="display: none;">
+            <div class="card-header">Student Analysis Results</div>
+            <div class="card-body" id="data_body">
+                <!-- Data loaded here -->
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">File Information</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">File Name</label>
+                    <div class="alert alert-info mb-0" style="font-size: 0.9rem;">{{ latest.original_name }}</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Total Students</label>
+                    <div class="alert alert-info mb-0" style="font-size: 0.9rem;">{{ latest.rows_count }}</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Total Features</label>
+                    <div class="alert alert-info mb-0" style="font-size: 0.9rem;">{{ latest.columns_count }}</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Uploaded</label>
+                    <div class="alert alert-info mb-0" style="font-size: 0.9rem;">{{ latest.uploaded_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> No data files available. Please <a href="/admin/upload">upload a file</a> to get started
+</div>
+{% endif %}
+
+<script>
+function loadStudentData() {
+    const studentId = document.getElementById('student_select').value;
+    if (!studentId) {
+        alert('Please select a student');
+        return;
+    }
+    
+    fetch(`/api/student/${studentId}`)
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) {
+                alert('Error: ' + data.error);
+                return;
+            }
+            
+            let html = '<table class="table"><tbody>';
+            for (let [key, value] of Object.entries(data.data)) {
+                html += `<tr><td><strong>${key}</strong></td><td>${value}</td></tr>`;
+            }
+            html += '</tbody></table>';
+            
+            document.getElementById('data_body').innerHTML = html;
+            document.getElementById('data_card').style.display = 'block';
+        })
+        .catch(e => alert('Error: ' + e));
+}
+</script>
+{% endblock %}

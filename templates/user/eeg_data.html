@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}EEG Data - User Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .eeg-container {
+        padding: 2rem 0;
+    }
+    
+    .eeg-header {
+        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+    }
+    
+    .eeg-header h2 {
+        margin: 0 0 0.5rem 0;
+        font-weight: 700;
+    }
+    
+    .eeg-header p {
+        margin: 0;
+        opacity: 0.95;
+        font-size: 0.95rem;
+    }
+    
+    .eeg-section {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+    
+    .eeg-section h3 {
+        color: #1e293b;
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .eeg-section h3 i {
+        color: #2563eb;
+        font-size: 1.3rem;
+    }
+    
+    .empty-message {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #64748b;
+    }
+    
+    .empty-message i {
+        font-size: 3rem;
+        opacity: 0.3;
+        color: #2563eb;
+        margin-bottom: 1rem;
+    }
+    
+    .feature-list {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .feature-list li {
+        padding: 1rem;
+        padding-left: 2.5rem;
+        position: relative;
+        color: #475569;
+    }
+    
+    .feature-list li::before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        color: #16a34a;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="eeg-container">
+    <!-- Page Header -->
+    <div style="margin-bottom: 2rem;">
+        <div class="page-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h1><i class="bi bi-bezier"></i> EEG Data Portal</h1>
+                    <p>Access and analyze EEG (Electroencephalography) data for cognitive research</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- User Navigation Tabs -->
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <a class="nav-link" href="/dashboard">
+                <i class="bi bi-graph-up"></i> Analyses
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active" href="{{ url_for('user_eeg_data') }}">
+                <i class="bi bi-bezier"></i> EEG Data
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/profile">
+                <i class="bi bi-person-circle"></i> Profile
+            </a>
+        </li>
+    </ul>
+    
+    <!-- EEG Data Intro -->
+    <div class="eeg-header">
+        <h2><i class="bi bi-brain"></i> Welcome to EEG Data Portal</h2>
+        <p>Explore electroencephalography data and research findings related to cognitive performance and neural activity patterns</p>
+    </div>
+    
+    <!-- Statistics Section -->
+    {% if eeg_analyses %}
+    <div class="stats-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <div class="stat-card-user" style="background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); color: white; padding: 1.5rem; border-radius: 10px; text-align: center;">
+            <h5 style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">Total Datasets</h5>
+            <div style="font-size: 2rem; font-weight: 700;">{{ total_datasets }}</div>
+        </div>
+        <div class="stat-card-user" style="background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color: white; padding: 1.5rem; border-radius: 10px; text-align: center;">
+            <h5 style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">Total Participants</h5>
+            <div style="font-size: 2rem; font-weight: 700;">{{ total_participants }}</div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Main Content -->
+    <div class="eeg-section">
+        <h3><i class="bi bi-file-earmark-pdf"></i> Available EEG Datasets</h3>
+        {% if eeg_analyses %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Analysis Title</th>
+                        <th>Description</th>
+                        <th>Participants</th>
+                        <th>Shared Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for analysis in eeg_analyses %}
+                    <tr>
+                        <td>
+                            <strong>{{ analysis.title }}</strong>
+                        </td>
+                        <td>
+                            <small>{{ analysis.description[:60] if analysis.description else 'No description' }}{{ '...' if analysis.description and analysis.description|length > 60 else '' }}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-info">{{ analysis.data_file.rows_count if analysis.data_file else 0 }}</span>
+                        </td>
+                        <td>
+                            <small class="text-muted">{{ analysis.created_at.strftime('%Y-%m-%d %H:%M') if analysis.created_at else 'N/A' }}</small>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('user_view_analysis', analysis_id=analysis.id) }}" class="btn btn-sm btn-primary">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-message">
+            <i class="bi bi-inbox"></i>
+            <h5>No EEG datasets available yet</h5>
+            <p>Administrators will share EEG data and analysis results with you here.</p>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Information Section -->
+    <div class="eeg-section">
+        <h3><i class="bi bi-info-circle"></i> About EEG Data</h3>
+        <p>EEG (Electroencephalography) is a non-invasive technique that measures electrical brain activity. Our platform integrates EEG analysis with cognitive performance metrics to provide comprehensive insights into:</p>
+        <ul class="feature-list">
+            <li>Neural correlates of cognitive load and performance</li>
+            <li>Brain activity patterns during learning and problem-solving</li>
+            <li>Temporal dynamics of cognitive processing</li>
+            <li>Individual differences in neural efficiency</li>
+            <li>Real-time cognitive state assessment</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

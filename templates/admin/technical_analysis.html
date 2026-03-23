@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Technical Analysis Manager - Admin{% endblock %}
+
+{% block content %}
+
+<div style="margin-bottom: 2rem;">
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h1><i class="bi bi-calculator"></i> Technical Analysis</h1>
+                <p>Manage Bloom's taxonomy weighted technical cognitive analyses</p>
+            </div>
+            <div class="col-auto">
+                <a href="/admin/technical-upload" class="btn btn-primary">
+                    <i class="bi bi-cloud-upload"></i> New Upload
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Admin Menu Tabs -->
+<ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/dashboard">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="/admin/advanced-calc">
+            <i class="bi bi-calculator"></i> Technical Analysis
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/data-manager">
+            <i class="bi bi-folder-check"></i> Data Manager
+        </a>
+    </li>
+</ul>
+
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-list-ul"></i> All Technical Analyses
+    </div>
+    <div class="card-body">
+        {% if analyses %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead style="background: #f8fafc;">
+                    <tr>
+                        <th>Title</th>
+                        <th>Records</th>
+                        <th>Uploaded By</th>
+                        <th>Upload Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for analysis in analyses %}
+                    <tr>
+                        <td>
+                            <strong>{{ analysis.title }}</strong>
+                            {% if analysis.description %}
+                                <br><small class="text-muted">{{ analysis.description[:60] }}...</small>
+                            {% endif %}
+                        </td>
+                        <td>{{ analysis.rows_count }}</td>
+                        <td>{{ analysis.uploaded_by }}</td>
+                        <td>{{ analysis.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                            {% if analysis.validation_status == 'valid' %}
+                                <span class="badge bg-success">✓ Valid</span>
+                            {% elif analysis.validation_status == 'invalid' %}
+                                <span class="badge bg-danger">✗ Invalid</span>
+                            {% else %}
+                                <span class="badge bg-warning">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex flex-wrap gap-2">
+                                <a href="/admin/technical-dashboard/{{ analysis.id }}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-graph-up"></i> Dashboard
+                                </a>
+                                <a href="/admin/technical-download/{{ analysis.id }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-download"></i> Download
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info mb-0">
+            <i class="bi bi-info-circle"></i> No technical analyses yet. <a href="/admin/technical-upload">Upload a dataset</a> to get started.
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

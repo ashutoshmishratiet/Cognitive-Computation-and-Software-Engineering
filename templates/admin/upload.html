@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Upload File - Admin{% endblock %}
+{% block content %}
+
+<div style="margin-bottom: 2rem;">
+    <div class="page-header">
+        <h1><i class="bi bi-cloud-upload"></i> Upload Data File</h1>
+        <p>Upload Excel or CSV files containing cognitive performance data</p>
+    </div>
+</div>
+
+<!-- Admin Menu Tabs -->
+<ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/dashboard">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="/admin/upload">
+            <i class="bi bi-cloud-upload"></i> Upload
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/data-manager">
+            <i class="bi bi-folder-check"></i> Data Manager
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/single-analysis">
+            <i class="bi bi-person-check"></i> Analysis
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/configuration">
+            <i class="bi bi-gear"></i> Settings
+        </a>
+    </li>
+</ul>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">Upload File</div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="form-group mb-3">
+                        <label class="form-label">Select File</label>
+                        <div class="border-2 border-dashed p-4 text-center" style="border-color: #e5e7eb; border-radius: 8px; cursor: pointer;" onclick="document.getElementById('file').click();">
+                            <i class="bi bi-cloud-upload" style="font-size: 2rem; color: #9ca3af;"></i>
+                            <p class="mt-2 mb-0">Drag & drop your file or click to browse</p>
+                            <small style="color: #9ca3af;">Supported: .xlsx, .xls, .csv (Max 100MB)</small>
+                        </div>
+                        <input type="file" id="file" name="file" class="form-control mt-3" accept=".xlsx,.xls,.csv" required style="display: none;">
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="description">Description (Optional)</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" placeholder="Add file description..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-upload"></i> Upload File
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">Requirements</div>
+            <div class="card-body">
+                <div style="color: #6b7280; font-size: 0.9rem; line-height: 1.8;">
+                    <p><strong>Accepted Formats:</strong></p>
+                    <ul class="mb-3">
+                        <li>.xlsx (Excel 2007+)</li>
+                        <li>.xls (Excel 97-2003)</li>
+                        <li>.csv (Comma-separated)</li>
+                    </ul>
+                    
+                    <p><strong>File Size:</strong></p>
+                    <ul class="mb-3">
+                        <li>Maximum: 100 MB</li>
+                    </ul>
+                    
+                    <p><strong>Data Structure:</strong></p>
+                    <ul>
+                        <li>First row contains column headers</li>
+                        <li>Data must be properly formatted</li>
+                        <li>Include cognitive metrics columns</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

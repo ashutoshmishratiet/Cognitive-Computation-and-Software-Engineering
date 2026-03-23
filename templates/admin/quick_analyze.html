@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Quick Analysis - Admin{% endblock %}
+
+{% block content %}
+
+<div style="margin-bottom: 2rem;">
+    <div class="page-header">
+        <h1><i class="bi bi-lightning"></i> Quick Analysis</h1>
+        <p>Configure and run analysis on selected file</p>
+    </div>
+</div>
+
+<!-- Admin Menu Tabs -->
+<ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/dashboard">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/upload">
+            <i class="bi bi-cloud-upload"></i> Upload
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/data-manager">
+            <i class="bi bi-folder-check"></i> Data Manager
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="/admin/single-analysis">
+            <i class="bi bi-person-check"></i> Analysis
+        </a>
+    </li>
+</ul>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">Analysis Configuration</div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="form-group mb-3">
+                        <label class="form-label">File Name</label>
+                        <div class="alert alert-info mb-0">
+                            <i class="bi bi-file-excel"></i> {{ file.original_name }}
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="form-label">Analysis Title *</label>
+                        <input type="text" class="form-control" name="title" 
+                               value="Analysis - {{ file.original_name }}" required>
+                        <small class="text-muted">Give this analysis a descriptive name</small>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label class="form-label">Description (Optional)</label>
+                        <textarea class="form-control" name="description" rows="4" 
+                                  placeholder="Add research notes, methodology, observations, or any relevant context..."></textarea>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-play-circle"></i> Run Analysis
+                        </button>
+                        <a href="/admin/data-manager" class="btn btn-outline-primary btn-lg">
+                            <i class="bi bi-arrow-left"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">File Information</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Rows (Students)</label>
+                    <div class="alert alert-info mb-0" style="font-size: 0.9rem;">{{ file.rows_count }}</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Columns (Features)</label>
+                    <div class="alert alert-info mb-0" style="font-size: 0.9rem;">{{ file.columns_count }}</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">File Size</label>
+                    <div class="alert alert-info mb-0" style="font-size: 0.9rem;">{{ "%.2f"|format(file.file_size / 1024 / 1024) }} MB</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Uploaded</label>
+                    <div class="alert alert-info mb-0" style="font-size: 0.9rem;">{{ file.uploaded_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">Analysis Includes</div>
+            <div class="card-body">
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li class="mb-2"><i class="bi bi-check-circle text-success"></i> Understanding Index</li>
+                    <li class="mb-2"><i class="bi bi-check-circle text-success"></i> Debugging Index</li>
+                    <li class="mb-2"><i class="bi bi-check-circle text-success"></i> Completion Index</li>
+                    <li class="mb-2"><i class="bi bi-check-circle text-success"></i> Emotion Index</li>
+                    <li class="mb-2"><i class="bi bi-check-circle text-success"></i> Cognitive Load</li>
+                    <li><i class="bi bi-check-circle text-success"></i> Problem Performance</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

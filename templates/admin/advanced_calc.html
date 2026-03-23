@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Advanced Calculations - Admin{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="sidebar">
+            <div style="padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <h5 style="margin: 0;">👨‍💼 Admin Panel</h5>
+            </div>
+            <div class="sidebar-item" onclick="location.href='/admin/dashboard'"><i class="bi bi-speedometer2"></i> Dashboard</div>
+            <div class="sidebar-item" onclick="location.href='/admin/upload'"><i class="bi bi-cloud-upload"></i> Upload File</div>
+            <div class="sidebar-item" onclick="location.href='/admin/data-manager'"><i class="bi bi-folder-check"></i> Data Manager</div>
+            <div class="sidebar-item" onclick="location.href='/admin/configuration'"><i class="bi bi-gear"></i> Configuration</div>
+            <div class="sidebar-item" onclick="location.href='/admin/single-analysis'"><i class="bi bi-person-check"></i> Single Analysis</div>
+            <div class="sidebar-item" onclick="location.href='/admin/bulk-analysis'"><i class="bi bi-people"></i> Bulk Analysis</div>
+            <div class="sidebar-item active" onclick="location.href='/admin/advanced-calc'"><i class="bi bi-calculator"></i> Advanced Calc</div>
+        </div>
+        
+        <div class="main-content">
+            <div class="page-header">
+                <h1><i class="bi bi-calculator"></i> Advanced Calculations</h1>
+                <p>Research-grade data analysis and calculations</p>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">Correlation Analysis</div>
+                        <div class="card-body">
+                            <p class="text-muted mb-3">Calculate correlations between variables</p>
+                            <label class="form-label">Variable 1</label>
+                            <select class="form-select mb-3">
+                                <option>-- Select variable --</option>
+                            </select>
+                            <label class="form-label">Variable 2</label>
+                            <select class="form-select mb-3">
+                                <option>-- Select variable --</option>
+                            </select>
+                            <button class="btn btn-primary w-100">
+                                <i class="bi bi-graph-up"></i> Calculate Correlation
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">Regression Analysis</div>
+                        <div class="card-body">
+                            <p class="text-muted mb-3">Perform linear/polynomial regression</p>
+                            <label class="form-label">Dependent Variable (Y)</label>
+                            <select class="form-select mb-3">
+                                <option>-- Select variable --</option>
+                            </select>
+                            <label class="form-label">Independent Variables (X)</label>
+                            <select class="form-select mb-3" multiple>
+                                <option>-- Select variables --</option>
+                            </select>
+                            <button class="btn btn-primary w-100">
+                                <i class="bi bi-graph-up"></i> Analyze Regression
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-3">
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">Clustering Analysis</div>
+                        <div class="card-body">
+                            <p class="text-muted mb-3">K-Means or hierarchical clustering</p>
+                            <label class="form-label">Number of Clusters</label>
+                            <input type="number" class="form-control mb-3" min="2" max="10" value="3">
+                            <label class="form-label">Method</label>
+                            <select class="form-select mb-3">
+                                <option>K-Means</option>
+                                <option>Hierarchical</option>
+                            </select>
+                            <button class="btn btn-primary w-100">
+                                <i class="bi bi-diagram-3"></i> Perform Clustering
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">Hypothesis Testing</div>
+                        <div class="card-body">
+                            <p class="text-muted mb-3">T-tests, ANOVA, Chi-square tests</p>
+                            <label class="form-label">Test Type</label>
+                            <select class="form-select mb-3">
+                                <option>T-Test (Independent)</option>
+                                <option>T-Test (Paired)</option>
+                                <option>ANOVA</option>
+                                <option>Chi-Square</option>
+                            </select>
+                            <label class="form-label">Significance Level (α)</label>
+                            <input type="number" class="form-control mb-3" min="0.01" max="0.1" value="0.05" step="0.01">
+                            <button class="btn btn-primary w-100">
+                                <i class="bi bi-check2-all"></i> Run Test
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h1><i class="bi bi-speedometer2"></i> Admin Dashboard</h1>
+                <p>Manage data, run analyses, and oversee cognitive performance metrics</p>
+            </div>
+            <div class="col-auto">
+                <a href="/admin/upload" class="btn btn-primary">
+                    <i class="bi bi-cloud-upload"></i> Upload File
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Admin Navigation Bar -->
+<nav class="admin-nav-bar mb-4">
+    <div class="nav-container">
+        <!-- Home -->
+        <a href="{{ url_for('admin_dashboard') }}" class="nav-item active" title="Dashboard home">
+            <i class="bi bi-house-door"></i>
+            <span>Home</span>
+        </a>
+        
+        <!-- Calculation (Bloom's taxonomy metrics) -->
+        <a href="{{ url_for('admin_advanced_calc') }}" class="nav-item" title="Bloom's taxonomy & cognitive metrics">
+            <i class="bi bi-calculator"></i>
+            <span>Calculation</span>
+        </a>
+        
+        <!-- Upload & Publish -->
+        <a href="{{ url_for('admin_upload') }}" class="nav-item" title="Upload datasets and manage files">
+            <i class="bi bi-cloud-upload"></i>
+            <span>Upload & Publish</span>
+        </a>
+        
+        <!-- Analysis -->
+        <a href="{{ url_for('admin_analyses') }}" class="nav-item" title="View and manage analyses">
+            <i class="bi bi-graph-up"></i>
+            <span>Analysis</span>
+        </a>
+        
+        <!-- EEG Data -->
+        <a href="{{ url_for('admin_eeg_data') }}" class="nav-item" title="View and manage EEG data">
+            <i class="bi bi-bezier"></i>
+            <span>EEG Data</span>
+        </a>
+        
+        <!-- User Data -->
+        <a href="{{ url_for('admin_user_management') }}" class="nav-item" title="Manage user accounts">
+            <i class="bi bi-people"></i>
+            <span>User Data</span>
+        </a>
+        
+        <!-- About Us (Modal trigger) -->
+        <a href="#" class="nav-item" data-bs-toggle="modal" data-bs-target="#aboutModal" title="About this dashboard">
+            <i class="bi bi-info-circle"></i>
+            <span>About Us</span>
+        </a>
+    </div>
+</nav>
+
+<!-- About Us Modal -->
+<div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="aboutModalLabel">
+                    <i class="bi bi-info-circle"></i> About This Dashboard
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6 class="mb-3">Cognitive & Emotional Performance Research Dashboard</h6>
+                <p>A research-grade analysis system for cognitive load and performance studies, incorporating:</p>
+                <ul>
+                    <li><strong>Cognitive Metrics:</strong> Understanding, Debugging, Completion indices</li>
+                    <li><strong>Technical Analysis:</strong> Bloom's taxonomy-weighted metrics</li>
+                    <li><strong>Emotional Metrics:</strong> Emotion value and cognitive load assessment</li>
+                    <li><strong>Performance Analysis:</strong> Problem-solving effectiveness measurement</li>
+                </ul>
+                <hr>
+                <p class="text-muted small mb-0">
+                    <i class="bi bi-building"></i> Research Platform v2.0<br>
+                    <i class="bi bi-calendar"></i> February 2026
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Admin Navigation Bar Styling */
+    .admin-nav-bar {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        padding: 0;
+        overflow: hidden;
+    }
+    
+    .nav-container {
+        display: flex;
+        width: 100%;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+    
+    .nav-item {
+        flex: 1;
+        min-width: 140px;
+        padding: 1rem;
+        text-decoration: none;
+        color: #64748b;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 500;
+        text-align: center;
+        cursor: pointer;
+    }
+    
+    .nav-item:hover {
+        color: #2563eb;
+        background-color: #f8fafc;
+        border-bottom-color: #2563eb;
+        text-decoration: none;
+    }
+    
+    .nav-item.active {
+        color: #2563eb;
+        border-bottom-color: #2563eb;
+        background-color: #f0f9ff;
+    }
+    
+    .nav-item i {
+        font-size: 1.3rem;
+    }
+    
+    .nav-item span {
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .nav-item {
+            min-width: 100px;
+            padding: 0.75rem 0.5rem;
+        }
+        
+        .nav-item span {
+            font-size: 0.8rem;
+        }
+        
+        .nav-item i {
+            font-size: 1.1rem;
+        }
+    }
+</style>
+            
+            <!-- Recent Files -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-file-earmark"></i> Recent Uploads
+                </div>
+                <div class="card-body">
+                    {% if files %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>File Name</th>
+                                    <th>Uploaded By</th>
+                                    <th>Date</th>
+                                    <th>Rows</th>
+                                    <th>Columns</th>
+                                    <th>Size</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for file in files %}
+                                <tr>
+                                    <td>
+                                        <i class="bi bi-file-excel"></i> {{ file.original_name }}
+                                    </td>
+                                    <td>{{ file.uploaded_by }}</td>
+                                    <td>{{ file.uploaded_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td><span class="badge bg-info">{{ file.rows_count }}</span></td>
+                                    <td><span class="badge bg-warning">{{ file.columns_count }}</span></td>
+                                    <td>{{ "%.2f"|format(file.file_size / 1024 / 1024) }} MB</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info mb-0">
+                        <i class="bi bi-info-circle"></i> No files uploaded yet. <a href="/admin/upload">Upload your first file</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Statistics -->
+            <div class="row mt-4 mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <h4>Total Files</h4>
+                        <div class="value">{{ stats.files }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <h4>Active Users</h4>
+                        <div class="value">{{ stats.users }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <h4>Last Upload</h4>
+                        <div class="value" style="font-size: 1rem;">
+                            {% if stats.last_upload %}
+                                {{ stats.last_upload.strftime('%m/%d') }}
+                            {% else %}
+                                No uploads
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <h4>Status</h4>
+                        <div class="value" style="color: #16a34a; font-size: 1.5rem;">
+                            <i class="bi bi-check-circle"></i> Active
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">Quick Actions</div>
+                        <div class="card-body">
+                            <a href="/admin/upload" class="btn btn-primary w-100 mb-2">
+                                <i class="bi bi-cloud-upload"></i> Upload New File
+                            </a>
+                            <a href="/admin/data-manager" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-folder"></i> Manage Files
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">Analysis Tools</div>
+                        <div class="card-body">
+                            <a href="/admin/single-analysis" class="btn btn-primary w-100 mb-2">
+                                <i class="bi bi-person-check"></i> Single Student
+                            </a>
+                            <a href="/admin/bulk-analysis" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-people"></i> Bulk Analysis
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

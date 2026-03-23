@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}Create Analysis - Admin{% endblock %}
+
+{% block content %}
+
+<div style="margin-bottom: 2rem;">
+    <div class="page-header">
+        <h1><i class="bi bi-lightning"></i> Create Analysis</h1>
+        <p>Calculate cognitive indices and generate insights</p>
+    </div>
+</div>
+
+<!-- Admin Menu Tabs -->
+<ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/dashboard">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/upload">
+            <i class="bi bi-cloud-upload"></i> Upload
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/data-manager">
+            <i class="bi bi-folder-check"></i> Data Manager
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="/admin/analyze">
+            <i class="bi bi-calculator"></i> Analyze
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/analyses">
+            <i class="bi bi-graph-up"></i> Analyses
+        </a>
+    </li>
+</ul>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">Select Data & Configure Analysis</div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Select Data File *</label>
+                                <select class="form-select" name="file_id" required>
+                                    <option value="">-- Choose file --</option>
+                                    {% for file in files %}
+                                    <option value="{{ file.id }}">{{ file.original_name }} ({{ file.rows_count }} records, {{ file.columns_count }} features)</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label class="form-label">Analysis Title *</label>
+                        <input type="text" class="form-control" name="title" placeholder="e.g., Spring 2024 Cognitive Assessment - Cohort A" required>
+                    </div>
+                    
+                    <div class="form-group mb-4">
+                        <label class="form-label">Description (Optional)</label>
+                        <textarea class="form-control" name="description" rows="3" placeholder="Add research notes, methodology, student cohort information, or any relevant context..."></textarea>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-play-circle"></i> Start Analysis
+                        </button>
+                        <a href="/admin/dashboard" class="btn btn-outline-secondary btn-lg">
+                            <i class="bi bi-arrow-left"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card mb-3">
+            <div class="card-header">What Gets Analyzed</div>
+            <div class="card-body" style="font-size: 0.95rem;">
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li class="mb-2"><i class="bi bi-check-circle text-success"></i> <strong>Understanding Index</strong></li>
+                    <li class="mb-2"><i class="bi bi-check-circle text-success"></i> <strong>Debugging Index</strong></li>
+                    <li class="mb-2"><i class="bi bi-check-circle text-success"></i> <strong>Completion Index</strong></li>
+                    <li class="mb-2"><i class="bi bi-check-circle text-success"></i> <strong>Technical Comprehensive Index</strong></li>
+                    <li class="mb-2"><i class="bi bi-check-circle text-success"></i> <strong>Emotion Index</strong></li>
+                    <li class="mb-2"><i class="bi bi-check-circle text-success"></i> <strong>Cognitive Load</strong></li>
+                    <li><i class="bi bi-check-circle text-success"></i> <strong>Problem Performance</strong> (Before/After)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">How It Works</div>
+            <div class="card-body" style="font-size: 0.9rem;">
+                <ol style="padding-left: 1.5rem; margin: 0;">
+                    <li class="mb-2">Select a data file you've uploaded</li>
+                    <li class="mb-2">Configure the analysis settings</li>
+                    <li class="mb-2">The system calculates all metrics</li>
+                    <li class="mb-2">Review results and publish</li>
+                    <li>Users can view published analyses</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Info Section -->
+            <div class="card mt-3">
+                <div class="card-header">What This Analysis Calculates</div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>📊 Cognitive Indices</h5>
+                            <ul class="list-unstyled">
+                                <li><strong>Understanding Index</strong> - U_C, U_W, U_NA analysis</li>
+                                <li><strong>Debugging Index</strong> - D_C, D_W, D_NA analysis</li>
+                                <li><strong>Completion Index</strong> - C_C, C_W, C_NA analysis</li>
+                                <li><strong>Technical Comprehensive</strong> - Combined technical score</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>❤️ Performance Metrics</h5>
+                            <ul class="list-unstyled">
+                                <li><strong>Emotion Index</strong> - Emotional engagement levels</li>
+                                <li><strong>Cognitive Load</strong> - CL1, CL2 analysis</li>
+                                <li><strong>Problem Performance</strong> - P1-P7 Before/After</li>
+                                <li><strong>Statistical Summary</strong> - Aggregated insights</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
