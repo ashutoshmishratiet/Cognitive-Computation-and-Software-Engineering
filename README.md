@@ -57,30 +57,7 @@ A comprehensive web application for cognitive data analysis and management with 
 5. **Access the application:**
    Open your browser and navigate to `http://localhost:5000`
 
-## Project Structure
-
-```
-cogn/
-├── app.py                          # Main Flask application
-├── requirements.txt                # Python dependencies
-├── instance/
-│   └── cogn_system.db             # SQLite database
-├── templates/
-│   ├── base.html                  # Base template
-│   ├── login.html                 # Login page
-│   ├── register.html              # Registration page
-│   ├── admin/                     # Admin templates
-│   │   ├── dashboard.html
-│   │   ├── user_management.html
-│   │   ├── upload.html
-│   │   ├── analyze.html
-│   │   └── ...
-│   └── user/                      # User templates
-│       ├── dashboard.html
-│       ├── profile.html
-│       └── view_analysis.html
-├── uploads/                       # User uploaded files
-└── test files/                    # Testing and verification scripts
+                # Testing and verification scripts
 ```
 
 ## Usage
