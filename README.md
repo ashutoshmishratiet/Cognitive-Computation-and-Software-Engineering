@@ -60,22 +60,6 @@ A comprehensive web application for cognitive data analysis and management with 
                 # Testing and verification scripts
 ```
 
-## Usage
-
-### Admin Features
-
-1. **User Management**: Create and manage user accounts
-2. **Data Upload**: Upload EEG data files in Excel format
-3. **Analysis Tools**: Run various analyses on uploaded data
-4. **Dashboard**: Monitor system activity and analytics
-5. **Configuration**: Manage system settings and parameters
-
-### User Features
-
-1. **Profile**: View and manage personal information
-2. **View Analysis**: Review analysis results and reports
-3. **Dashboard**: Personal analytics overview
-4. **Data Viewing**: Access EEG data information
 
 ## Configuration
 
@@ -89,12 +73,6 @@ Key configuration parameters can be adjusted in `app.py`:
 
 Run the test files to verify system functionality:
 
-```bash
-python test_routes.py              # Test API routes
-python test_technical_metrics.py   # Test technical analysis
-python test_paper_analyzer.py      # Test paper-compliant analysis
-python test_comprehensive_metrics.py # Test comprehensive metrics
-```
 
 ## File Formats
 
@@ -120,13 +98,6 @@ The application uses SQLite for data persistence. The database includes tables f
 - Upload history
 - System logs
 
-## Troubleshooting
-
-### Common Issues
-
-1. **Port already in use**: Change the port in `app.py` or stop the service using port 5000
-2. **Database errors**: Delete `instance/cogn_system.db` to reset (creates new on next run)
-3. **Import errors**: Ensure all requirements are installed with `pip install -r requirements.txt`
 
 ## Contributing
 
